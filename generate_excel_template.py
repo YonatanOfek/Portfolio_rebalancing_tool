@@ -23,16 +23,16 @@ ws.write('B2', '')
 
 data = read_csv_export(pathlib.Path(
         "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/portfolio_export_for_testing.csv")).values
+t1_name = 'Position_list'
+market_value_formula = f'={t1_name}[@[Size]*[Last]]'
+percent_netliq_formula = f'=({t1_name}[@[Market Value]])/{netliq_cell_loc}'
+weighted_exposure_formula_redhead = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Redhead %]])'
+weighted_exposure_formula_workhorse = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Workhorse %]])'
+weighted_exposure_formula_safe = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Safe %]])'
 
-market_value_formula = f'=Position_list[@[Size]*[Last]]'
-percent_netliq_formula = f'=(Position_list[@[Market Value]])/{netliq_cell_loc}'
-weighted_exposure_formula_redhead = f'=(Position_list[@[Market Value]])*(Position_list[@[Redhead %]])'
-weighted_exposure_formula_workhorse = f'=(Position_list[@[Market Value]])*(Position_list[@[Workhorse %]])'
-weighted_exposure_formula_safe = f'=(Position_list[@[Market Value]])*(Position_list[@[Safe %]])'
 
 
-
-ws.add_table('B3:G11', {'name': 'Position_list',
+ws.add_table('B3:G11', {'name': f'{t1_name}',
                         'data': data,
                         'columns': [{'header': 'Financial Instrument'},
                                     {'header': 'Size'},
@@ -41,10 +41,10 @@ ws.add_table('B3:G11', {'name': 'Position_list',
                                     {'header': '% of Net Liq', 'formula': percent_netliq_formula},
                                     {'header': 'Redhead %'},
                                     {'header': 'Workhorse %'},
-                                    {'header': 'Safe %'},
-                                    {'header': 'Redhead %', 'formula': weighted_exposure_formula_redhead},
-                                    {'header': 'Workhorse %', 'formula': weighted_exposure_formula_workhorse},
-                                    {'header': 'Safe %', 'formula': weighted_exposure_formula_safe}
+                                    {'header': 'Safe %'}, 
+                                    {'header': 'Redhead', 'formula': weighted_exposure_formula_redhead},
+                                    {'header': 'Workhorse', 'formula': weighted_exposure_formula_workhorse},
+                                    {'header': 'Safe', 'formula': weighted_exposure_formula_safe}
                                     ]})
 
 pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
@@ -52,9 +52,9 @@ pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
 ws.conditional_format('B3', {'type':   'blanks',
                                        'format': pleasefillin_format})
 # add strat relationship columns using wizard - cond. formatting RED.
-ws.conditional_format('Position_list[[Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
-ws.conditional_format('Position_list[[Workhorse %]]', {'type':   'blanks', 'format': pleasefillin_format})
-ws.conditional_format('Position_list[[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format})
+ws.conditional_format(f'{t1_name}[[Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
+ws.conditional_format(f'{t1_name}[[Workhorse %]]', {'type':   'blanks', 'format': pleasefillin_format})
+ws.conditional_format(f'{t1_name}[[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format})
 
 
 # do something for puts and short assets
@@ -62,16 +62,16 @@ ws.conditional_format('Position_list[[Redhead %]]', {'type':   'blanks', 'format
 
 
 # calculate strat distribution in table
+t2_name = 'Strat_distribution'
+strat_name = f'{t2_name}[@[Strategy]]'
+strat_distribution_formula = f'=SUM({t1_name}[{strat_name}])' #todo - best way to choose for row?
 
-strat_distribution_formula = ''
 
-ws.add_table('B13:G17', {'name': 'Strat_distribution',
+ws.add_table('B13:G17', {'name': t2_name,
                          'data': data,
                          'columns': [{'header': 'Strategy'},
                                     {'header': 'Portfolio Weight', 'formula': strat_distribution_formula}
                                     ]})
-
-strat_mkt_values = {strat_name:df2[strat_name] * df2['Market Value'] for strat_name in strat_list}
 
 
 # plot a pie chart
