@@ -26,6 +26,10 @@ data = read_csv_export(pathlib.Path(
 
 market_value_formula = f'=Position_list[@[Size]*[Last]]'
 percent_netliq_formula = f'=(Position_list[@[Market Value]])/{netliq_cell_loc}'
+weighted_exposure_formula_redhead = f'=(Position_list[@[Market Value]])*(Position_list[@[Redhead %]])'
+weighted_exposure_formula_workhorse = f'=(Position_list[@[Market Value]])*(Position_list[@[Workhorse %]])'
+weighted_exposure_formula_safe = f'=(Position_list[@[Market Value]])*(Position_list[@[Safe %]])'
+
 
 
 ws.add_table('B3:G11', {'name': 'Position_list',
@@ -33,13 +37,14 @@ ws.add_table('B3:G11', {'name': 'Position_list',
                         'columns': [{'header': 'Financial Instrument'},
                                     {'header': 'Size'},
                                     {'header': 'Last'},
-                                    {'header': 'Market Value',
-                                     'formula': market_value_formula},
-                                    {'header': '% of Net Liq',
-                                     'formula': percent_netliq_formula},
-                                    {'header': 'Safe %'},
+                                    {'header': 'Market Value', 'formula': market_value_formula},
+                                    {'header': '% of Net Liq', 'formula': percent_netliq_formula},
+                                    {'header': 'Redhead %'},
                                     {'header': 'Workhorse %'},
-                                    {'header': 'Redhead %'}
+                                    {'header': 'Safe %'},
+                                    {'header': 'Redhead %', 'formula': weighted_exposure_formula_redhead},
+                                    {'header': 'Workhorse %', 'formula': weighted_exposure_formula_workhorse},
+                                    {'header': 'Safe %', 'formula': weighted_exposure_formula_safe}
                                     ]})
 
 pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
@@ -47,12 +52,9 @@ pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
 ws.conditional_format('B3', {'type':   'blanks',
                                        'format': pleasefillin_format})
 # add strat relationship columns using wizard - cond. formatting RED.
-ws.conditional_format('Position_list[[Safe %]]', {'type':   'blanks',
-                                                     'format': pleasefillin_format})
-ws.conditional_format('Position_list[[Workhorse %]]', {'type':   'blanks',
-                                                          'format': pleasefillin_format})
-ws.conditional_format('Position_list[[Redhead %]]', {'type':   'blanks',
-                                                        'format': pleasefillin_format})
+ws.conditional_format('Position_list[[Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
+ws.conditional_format('Position_list[[Workhorse %]]', {'type':   'blanks', 'format': pleasefillin_format})
+ws.conditional_format('Position_list[[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format})
 
 
 # do something for puts and short assets
@@ -66,8 +68,7 @@ strat_distribution_formula = ''
 ws.add_table('B13:G17', {'name': 'Strat_distribution',
                          'data': data,
                          'columns': [{'header': 'Strategy'},
-                                    {'header': 'Portfolio Weight',
-                                     'formula': strat_distribution_formula}
+                                    {'header': 'Portfolio Weight', 'formula': strat_distribution_formula}
                                     ]})
 
 strat_mkt_values = {strat_name:df2[strat_name] * df2['Market Value'] for strat_name in strat_list}
