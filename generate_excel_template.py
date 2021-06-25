@@ -24,11 +24,12 @@ ws.write('B2', '')
 data = read_csv_export(pathlib.Path(
         "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/portfolio_export_for_testing.csv")).values
 
-market_value_formula = f'=Table1[@[Size]*[Last]]'
-percent_netliq_formula = f'=(Table1[@[Market Value]])/{netliq_cell_loc}'
+market_value_formula = f'=Position_list[@[Size]*[Last]]'
+percent_netliq_formula = f'=(Position_list[@[Market Value]])/{netliq_cell_loc}'
 
 
-ws.add_table('B3:G11', {'data': data,
+ws.add_table('B3:G11', {'name': 'Position_list',
+                        'data': data,
                         'columns': [{'header': 'Financial Instrument'},
                                     {'header': 'Size'},
                                     {'header': 'Last'},
@@ -46,11 +47,11 @@ pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
 ws.conditional_format('B3', {'type':   'blanks',
                                        'format': pleasefillin_format})
 # add strat relationship columns using wizard - cond. formatting RED.
-ws.conditional_format('Table1[[Safe %]]', {'type':   'blanks',
+ws.conditional_format('Position_list[[Safe %]]', {'type':   'blanks',
                                                      'format': pleasefillin_format})
-ws.conditional_format('Table1[[Workhorse %]]', {'type':   'blanks',
+ws.conditional_format('Position_list[[Workhorse %]]', {'type':   'blanks',
                                                           'format': pleasefillin_format})
-ws.conditional_format('Table1[[Redhead %]]', {'type':   'blanks',
+ws.conditional_format('Position_list[[Redhead %]]', {'type':   'blanks',
                                                         'format': pleasefillin_format})
 
 
@@ -60,7 +61,14 @@ ws.conditional_format('Table1[[Redhead %]]', {'type':   'blanks',
 
 # calculate strat distribution in table
 
-ws.add_table() #todo
+strat_distribution_formula = ''
+
+ws.add_table('B13:G17', {'name': 'Strat_distribution',
+                         'data': data,
+                         'columns': [{'header': 'Strategy'},
+                                    {'header': 'Portfolio Weight',
+                                     'formula': strat_distribution_formula}
+                                    ]})
 
 strat_mkt_values = {strat_name:df2[strat_name] * df2['Market Value'] for strat_name in strat_list}
 
