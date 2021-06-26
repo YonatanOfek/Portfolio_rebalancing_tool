@@ -4,7 +4,7 @@ import pathlib
 
 def read_csv_export(export_filename: str):
     df_ = pd.read_csv(export_filename)
-    target_columns = ['Financial Instrument', 'Size', 'Last']
+    target_columns = ['Financial Instrument', 'Position', 'Last']
     df2 = pd.concat([df_[key] for key in target_columns], axis=1)
     return df2
 

@@ -13,7 +13,7 @@ ws = wb.add_worksheet('Data')
 
 
 # initiate headers
-# headers = ['Financial Instrument', 'Size', 'Last', 'Market Value', '% of Net Liq'] + STRAT_LIST
+# headers = ['Financial Instrument', 'Position', 'Last', 'Market Value', '% of Net Liq'] + STRAT_LIST
 
 ws.write('A1', 'Net Liquidity:')
 netliq_cell_loc = '$B$1'
@@ -24,7 +24,7 @@ ws.write('B2', '')
 data = read_csv_export(pathlib.Path(
         "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/portfolio_export_for_testing.csv")).values
 t1_name = 'Position_list'
-market_value_formula = f'={t1_name}[@[Size]*[Last]]'
+market_value_formula = f'={t1_name}[@[Position]*[Last]]'
 percent_netliq_formula = f'=({t1_name}[@[Market Value]])/{netliq_cell_loc}'
 weighted_exposure_formula_redhead = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Redhead %]])'
 weighted_exposure_formula_workhorse = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Workhorse %]])'
@@ -35,7 +35,7 @@ weighted_exposure_formula_safe = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Sa
 ws.add_table('B3:G11', {'name': f'{t1_name}',
                         'data': data,
                         'columns': [{'header': 'Financial Instrument'},
-                                    {'header': 'Size'},
+                                    {'header': 'Position'},
                                     {'header': 'Last'},
                                     {'header': 'Market Value', 'formula': market_value_formula},
                                     {'header': '% of Net Liq', 'formula': percent_netliq_formula},
