@@ -77,23 +77,10 @@ ws.add_table('B13:G17', {'name': t2_name,
 # plot a pie chart
 strategy_destribution_chart = wb.add_chart({'type': 'pie'})
 
-chart.add_series({
-    'values':      '=Table2[]', #todo
+strategy_destribution_chart.add_series({
+    'values':      f'={t2_name}[Portfolio Weight]', #todo
     'data_labels': {'percentage': True},
 })
-ws.Range('A1').FormulaR1C1 = 'X'
-ws.Range('B1').FormulaR1C1 = 'Y'
-ws.Range('A2').FormulaR1C1 = 1
-ws.Range('A3').FormulaR1C1 = 2
-ws.Range('A4').FormulaR1C1 = 3
-ws.Range('B2').FormulaR1C1 = 4
-ws.Range('B3').FormulaR1C1 = 5
-ws.Range('B4').FormulaR1C1 = 6
-#ws.Range('A1:B4').Select()
-ch = ws.Shapes.AddChart().Select()
-xl.ActiveChart.ChartType = c.xlXYScatterLines
-xl.ActiveChart.SetSourceData(Source=ws.Range("A1:B4"))
-
 
 # Save file on desktop
 wb.close()
