@@ -3,7 +3,7 @@ from read_csv_into_df import read_csv_export
 import pathlib
 # Create a workbook and add a worksheet.
 
-wb = xlsxwriter.Workbook('Portfolio_mgmt.xlsx', {'nan_inf_to_errors': True})
+wb = xlsxwriter.Workbook('C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/Portfolio_mgmt_testing.xlsx', {'nan_inf_to_errors': True})
 ws = wb.add_worksheet('Data')
 
 
@@ -21,17 +21,16 @@ ws.write_formula(netliq_cell_loc, '=1000000') # todo
 ws.write('A2', 'USD Cash Position:')
 ws.write('B2', '')
 
-data = read_csv_export(pathlib.Path(
-        "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/portfolio_export_for_testing.csv")).values
+data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_easy.csv")).values
 t1_name = 'Position_list'
-market_value_formula = f'={t1_name}[@[Position]*[Last]]'
-percent_netliq_formula = f'=({t1_name}[@[Market Value]])/{netliq_cell_loc}'
-weighted_exposure_formula_redhead = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Redhead %]])'
-weighted_exposure_formula_workhorse = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Workhorse %]])'
-weighted_exposure_formula_safe = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Safe %]])'
+market_value_formula = f'=[[#This Row],[Position]]*[[#This Row],[Last]]'
+percent_netliq_formula = f'=([[#This Row],[Market Value]])/{netliq_cell_loc}'
+weighted_exposure_formula_redhead = f'=([[#This Row],[Market Value]])*([[#This Row],[Redhead %]])'
+weighted_exposure_formula_workhorse = f'=([[#This Row], [Market Value]])*([[#This Row], [Workhorse %]])'
+weighted_exposure_formula_safe = f'=([[#This Row], [Market Value]])*([[#This Row],[Safe %]])'
 
 
-ws.add_table('B3:L11', {'name': f'{t1_name}',
+ws.add_table('B3:L9', {'name': f'{t1_name}',
                         'data': data,
                         'columns': [{'header': 'Financial Instrument'},
                                     {'header': 'Position'},
