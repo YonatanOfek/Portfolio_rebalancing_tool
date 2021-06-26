@@ -3,7 +3,7 @@ from read_csv_into_df import read_csv_export
 import pathlib
 # Create a workbook and add a worksheet.
 
-wb = xlsxwriter.Workbook('Portfolio_mgmt.xlsx')
+wb = xlsxwriter.Workbook('Portfolio_mgmt.xlsx', {'nan_inf_to_errors': True})
 ws = wb.add_worksheet('Data')
 
 
@@ -17,7 +17,7 @@ ws = wb.add_worksheet('Data')
 
 ws.write('A1', 'Net Liquidity:')
 netliq_cell_loc = '$B$1'
-ws.write_formula(netliq_cell_loc, '=') # todo
+ws.write_formula(netliq_cell_loc, '=1000000') # todo
 ws.write('A2', 'USD Cash Position:')
 ws.write('B2', '')
 
@@ -31,8 +31,7 @@ weighted_exposure_formula_workhorse = f'=({t1_name}[@[Market Value]])*({t1_name}
 weighted_exposure_formula_safe = f'=({t1_name}[@[Market Value]])*({t1_name}[@[Safe %]])'
 
 
-
-ws.add_table('B3:G11', {'name': f'{t1_name}',
+ws.add_table('B3:L11', {'name': f'{t1_name}',
                         'data': data,
                         'columns': [{'header': 'Financial Instrument'},
                                     {'header': 'Position'},
@@ -52,9 +51,9 @@ pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
 ws.conditional_format('B3', {'type':   'blanks',
                                        'format': pleasefillin_format})
 # add strat relationship columns using wizard - cond. formatting RED.
-ws.conditional_format(f'{t1_name}[[Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
-ws.conditional_format(f'{t1_name}[[Workhorse %]]', {'type':   'blanks', 'format': pleasefillin_format})
-ws.conditional_format(f'{t1_name}[[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format})
+# ws.conditional_format(f'{t1_name}[[Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
+# ws.conditional_format(f'{t1_name}[[Workhorse %]]', {'type':   'blanks', 'format': pleasefillin_format})
+# ws.conditional_format(f'{t1_name}[[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format})
 
 
 # do something for puts and short assets
