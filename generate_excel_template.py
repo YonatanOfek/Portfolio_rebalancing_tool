@@ -42,8 +42,10 @@ ws.conditional_format('B2', {'type':   'blanks',
 
 
 # add table
+topleft_corner_of_t1 = [2,1] # B1
+t1_range = [2, 1, data.shape[0] + topleft_corner_of_t1[0], 11]
 
-ws.add_table('B3:L9', {'name': f'{t1_name}',
+ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': f'{t1_name}',
                         'data': data,
                         'columns': [{'header': 'Financial Instrument'},
                                     {'header': 'Position'},
@@ -63,10 +65,6 @@ pos_list_table_range = ws.tables[0]['range']
 
 # add strat relationship columns using wizard - cond. formatting RED.
 ws.conditional_format(pos_list_table_range, {'type':   'blanks', 'format': pleasefillin_format})
-
-
-
-
 
 # do something for puts and short assets
 
