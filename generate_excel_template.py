@@ -65,11 +65,11 @@ strat_name = f'=[[#This Row], [Strategy]]'
 strat_distribution_formula = f'=SUM({t1_name}[{strat_name}])' #todo - best way to choose for row?
 
 
-ws.add_table('B13:G17', {'name': t2_name,
-                         'data': data,
-                         'columns': [{'header': 'Strategy'},
-                                    {'header': 'Portfolio Weight', 'formula': strat_distribution_formula}
-                                    ]})
+# ws.add_table('B13:G17', {'name': t2_name, # todo add back in
+#                          'data': data,
+#                          'columns': [{'header': 'Strategy'},
+#                                     {'header': 'Portfolio Weight', 'formula': strat_distribution_formula}
+#                                     ]})
 
 
 # plot a pie chart
