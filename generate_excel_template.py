@@ -47,7 +47,7 @@ ws.add_table('B3:L9', {'name': f'{t1_name}',
 
 pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
 # add cash data using wizard  - - cond. formatting RED
-ws.conditional_format('B3', {'type':   'blanks',
+ws.conditional_format('B2', {'type':   'blanks',
                                        'format': pleasefillin_format})
 # add strat relationship columns using wizard - cond. formatting RED.
 # ws.conditional_format(f'{t1_name}[[Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
@@ -61,7 +61,7 @@ ws.conditional_format('B3', {'type':   'blanks',
 
 # calculate strat distribution in table
 t2_name = 'Strat_distribution'
-strat_name = f'{t2_name}[@[Strategy]]'
+strat_name = f'=[[#This Row], [Strategy]]'
 strat_distribution_formula = f'=SUM({t1_name}[{strat_name}])' #todo - best way to choose for row?
 
 
