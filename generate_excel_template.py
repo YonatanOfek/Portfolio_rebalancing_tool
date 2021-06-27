@@ -21,7 +21,9 @@ netliq_cell_loc = '$B$1'
 ws.write_formula(netliq_cell_loc, '=1000000') # todo
 ws.write('A2', 'USD Cash Position:')
 ws.write('B2', '')
-
+ws.set_column('U:U',width=115)
+ws.write('U1', 'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY',
+         wb.add_format({'bold': True, 'bg_color':  'black', 'font_color':'red'}))
 data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing.csv")).values # todo why n = 59?
 
 
@@ -67,7 +69,7 @@ pos_list_table_range = ws.tables[0]['range']
 ws.conditional_format(pos_list_table_range, {'type':   'blanks', 'format': pleasefillin_format})
 
 # do something for puts and short assets
-
+# Put Price + Maximum ((20% 2* Underlying Price - Out of the Money Amount),(10% * Strike Price))
 
 
 # initialize t2
