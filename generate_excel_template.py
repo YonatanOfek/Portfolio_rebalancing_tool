@@ -42,8 +42,8 @@ ws.conditional_format('B2', {'type':   'blanks',
 
 
 # add table
-topleft_corner_of_t1 = [2,1] # B1
-t1_range = [2, 1, data.shape[0] + topleft_corner_of_t1[0], 11]
+topleft_corner_of_t1 = [2, 1] # B1
+t1_range = [topleft_corner_of_t1[0], topleft_corner_of_t1[1], data.shape[0] + topleft_corner_of_t1[0], 11]
 
 ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': f'{t1_name}',
                         'data': data,
@@ -75,12 +75,16 @@ t2_name = 'Strat_distribution'
 strat_name = f'=[[#This Row], [Strategy]]'
 strat_distribution_formula = f'=SUM({t1_name}[{strat_name}])' #todo - best way to choose for row?
 
+topleft_corner_of_t2 = [2, 14] # N3
+t1_range = [topleft_corner_of_t2[0], topleft_corner_of_t2[1], topleft_corner_of_t2[0] + 3, topleft_corner_of_t2[1] + 2]
 
-# ws.add_table('B13:G17', {'name': t2_name, # todo add back in
-#                          'data': data,
-#                          'columns': [{'header': 'Strategy'},
-#                                     {'header': 'Portfolio Weight', 'formula': strat_distribution_formula}
-#                                     ]})
+data2 =
+
+ws.add_table('B13:G17', {'name': t2_name, # todo add back in
+                         'data': data2,
+                         'columns': [{'header': 'Strategy'},
+                                    {'header': 'Portfolio Weight', 'formula': strat_distribution_formula}
+                                    ]})
 
 
 # plot a pie chart
