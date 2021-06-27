@@ -22,7 +22,7 @@ ws.write_formula(netliq_cell_loc, '=1000000') # todo
 ws.write('A2', 'USD Cash Position:')
 ws.write('B2', '')
 
-data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_easy.csv")).values # todo why n = 59?
+data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing.csv")).values # todo why n = 59?
 
 
 t1_name = 'Position_list'
