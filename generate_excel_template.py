@@ -63,7 +63,7 @@ pos_list_table_range = ws.tables[0]['range']
 
 # add strat relationship columns using wizard - cond. formatting RED.
 ws.conditional_format(pos_list_table_range, {'type':   'blanks', 'format': pleasefillin_format})
-# ws.conditional_format(f'={t1_name}[[#Data],[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format}) todo - write an exhaustive get_range_for_column function
+
 
 
 
