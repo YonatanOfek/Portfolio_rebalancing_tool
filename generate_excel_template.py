@@ -70,17 +70,23 @@ ws.conditional_format(pos_list_table_range, {'type':   'blanks', 'format': pleas
 
 
 
-# calculate strat distribution in table
+# initialize t2
 t2_name = 'Strat_distribution'
+topleft_corner_of_t2 = [2, 14] # N3
+t1_range = [topleft_corner_of_t2[0], topleft_corner_of_t2[1], topleft_corner_of_t2[0] + 3, topleft_corner_of_t2[1] + 1]
+data2 = np.zeros([3, 2],'<U1')
+
+# calculate strat distribution in table
+
 strat_name = f'=[[#This Row], [Strategy]]'
+
+
+
+
 strat_distribution_formula = f'=SUM({t1_name}[{strat_name}])' #todo - best way to choose for row?
 
-topleft_corner_of_t2 = [2, 14] # N3
-t1_range = [topleft_corner_of_t2[0], topleft_corner_of_t2[1], topleft_corner_of_t2[0] + 3, topleft_corner_of_t2[1] + 2]
 
-data2 =
-
-ws.add_table('B13:G17', {'name': t2_name, # todo add back in
+ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': t2_name, # todo add back in
                          'data': data2,
                          'columns': [{'header': 'Strategy'},
                                     {'header': 'Portfolio Weight', 'formula': strat_distribution_formula}
