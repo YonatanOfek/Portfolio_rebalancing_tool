@@ -1,6 +1,7 @@
 import xlsxwriter
 from read_csv_into_df import read_csv_export
 import pathlib
+import numpy as np
 # Create a workbook and add a worksheet.
 
 wb = xlsxwriter.Workbook('C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/Portfolio_mgmt_testing.xlsx', {'nan_inf_to_errors': True})
@@ -22,6 +23,10 @@ ws.write('A2', 'USD Cash Position:')
 ws.write('B2', '')
 
 data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_easy.csv")).values
+# adding zero padding to data for conditional formatting
+
+data = np.concatenate([data, np.zeros([data.shape[0], 2],'<U1'), np.zeros([data.shape[0],3])],1) # todo why n = 59?
+
 t1_name = 'Position_list'
 market_value_formula = f'=[[#This Row],[Position]]*[[#This Row],[Last]]'
 percent_netliq_formula = f'=([[#This Row],[Market Value]])/{netliq_cell_loc}'
@@ -29,6 +34,28 @@ weighted_exposure_formula_redhead = f'=([[#This Row],[Market Value]])*([[#This R
 weighted_exposure_formula_workhorse = f'=([[#This Row], [Market Value]])*([[#This Row], [Workhorse %]])'
 weighted_exposure_formula_safe = f'=([[#This Row], [Market Value]])*([[#This Row],[Safe %]])'
 
+# add formatting
+pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
+
+cond_pleasefillin_format = wb.add_format()
+# add cash data using wizard  - - cond. formatting RED
+ws.conditional_format('B2', {'type':   'blanks',
+                                       'format': pleasefillin_format})
+# add strat relationship columns using wizard - cond. formatting RED.
+
+# set cell_format 10 to the correct rule, set the format to cel_format10
+
+# make an elaborate matching functino for the cells out of the table into the conditional format?
+
+cond_pleasefillin_format.set_num_format('[Green]General;[Red]-General;[Red]General')
+ws.write(20, 0, 123, cond_pleasefillin_format)  # > 0 Green
+ws.write(21, 0, -45, cond_pleasefillin_format)  # < 0 Red
+ws.write(22, 0,   0, cond_pleasefillin_format)  # = 0 Default color
+# ws.conditional_format(f'{t1_name}[[#Data], [Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
+# ws.conditional_format(f'{t1_name}[[#Data],[Workhorse %]]', {'type':   'blanks', 'format': pleasefillin_format})
+# ws.conditional_format(f'{t1_name}[[#Data],[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format})
+
+# add table
 
 ws.add_table('B3:L9', {'name': f'{t1_name}',
                         'data': data,
@@ -37,22 +64,14 @@ ws.add_table('B3:L9', {'name': f'{t1_name}',
                                     {'header': 'Last'},
                                     {'header': 'Market Value', 'formula': market_value_formula},
                                     {'header': '% of Net Liq', 'formula': percent_netliq_formula},
-                                    {'header': 'Redhead %'},
-                                    {'header': 'Workhorse %'},
-                                    {'header': 'Safe %'}, 
+                                    {'header': 'Redhead %', 'format': cond_pleasefillin_format},
+                                    {'header': 'Workhorse %', 'format': cond_pleasefillin_format},
+                                    {'header': 'Safe %', 'format': cond_pleasefillin_format},
                                     {'header': 'Redhead', 'formula': weighted_exposure_formula_redhead},
                                     {'header': 'Workhorse', 'formula': weighted_exposure_formula_workhorse},
                                     {'header': 'Safe', 'formula': weighted_exposure_formula_safe}
                                     ]})
 
-pleasefillin_format = wb.add_format({'bg_color':   '#FFC7CE'})
-# add cash data using wizard  - - cond. formatting RED
-ws.conditional_format('B2', {'type':   'blanks',
-                                       'format': pleasefillin_format})
-# add strat relationship columns using wizard - cond. formatting RED.
-# ws.conditional_format(f'{t1_name}[[Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
-# ws.conditional_format(f'{t1_name}[[Workhorse %]]', {'type':   'blanks', 'format': pleasefillin_format})
-# ws.conditional_format(f'{t1_name}[[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format})
 
 
 # do something for puts and short assets
