@@ -22,10 +22,8 @@ ws.write_formula(netliq_cell_loc, '=1000000') # todo
 ws.write('A2', 'USD Cash Position:')
 ws.write('B2', '')
 
-data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_easy.csv")).values
-# adding zero padding to data for conditional formatting
+data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_easy.csv")).values # todo why n = 59?
 
-data = np.concatenate([data, np.zeros([data.shape[0], 2],'<U1'), np.zeros([data.shape[0],3])],1) # todo why n = 59?
 
 t1_name = 'Position_list'
 market_value_formula = f'=[[#This Row],[Position]]*[[#This Row],[Last]]'
@@ -41,19 +39,7 @@ cond_pleasefillin_format = wb.add_format()
 # add cash data using wizard  - - cond. formatting RED
 ws.conditional_format('B2', {'type':   'blanks',
                                        'format': pleasefillin_format})
-# add strat relationship columns using wizard - cond. formatting RED.
 
-# set cell_format 10 to the correct rule, set the format to cel_format10
-
-# make an elaborate matching functino for the cells out of the table into the conditional format?
-
-cond_pleasefillin_format.set_num_format('[Green]General;[Red]-General;[Red]General')
-ws.write(20, 0, 123, cond_pleasefillin_format)  # > 0 Green
-ws.write(21, 0, -45, cond_pleasefillin_format)  # < 0 Red
-ws.write(22, 0,   0, cond_pleasefillin_format)  # = 0 Default color
-# ws.conditional_format(f'{t1_name}[[#Data], [Safe %]]', {'type':   'blanks', 'format': pleasefillin_format})
-# ws.conditional_format(f'{t1_name}[[#Data],[Workhorse %]]', {'type':   'blanks', 'format': pleasefillin_format})
-# ws.conditional_format(f'{t1_name}[[#Data],[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format})
 
 # add table
 
@@ -71,6 +57,14 @@ ws.add_table('B3:L9', {'name': f'{t1_name}',
                                     {'header': 'Workhorse', 'formula': weighted_exposure_formula_workhorse},
                                     {'header': 'Safe', 'formula': weighted_exposure_formula_safe}
                                     ]})
+
+
+pos_list_table_range = ws.tables[0]['range']
+
+# add strat relationship columns using wizard - cond. formatting RED.
+ws.conditional_format(pos_list_table_range, {'type':   'blanks', 'format': pleasefillin_format})
+# ws.conditional_format(f'={t1_name}[[#Data],[Redhead %]]', {'type':   'blanks', 'format': pleasefillin_format}) todo - write an exhaustive get_range_for_column function
+
 
 
 
