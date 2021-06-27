@@ -99,12 +99,13 @@ for i, j in zip([1,2,3],[f'=SUM({t1_name}[[#Data],[Redhead]])', f'=SUM({t1_name}
 
 # plot a pie chart
 strategy_destribution_chart = wb.add_chart({'type': 'pie'})
-
+strategy_destribution_chart.set_title({'name': 'Portfolio Strategies Distribution Chart'})
 strategy_destribution_chart.add_series({
-    'values':      f'={t2_name}[Portfolio Weight]', #todo
+    'categories': f'={t2_name}[Strategy]',
+    'values':      f'={t2_name}[Portfolio Weight]',
     'data_labels': {'percentage': True},
 })
-
+ws.insert_chart(topleft_corner_of_t2[0], topleft_corner_of_t2[1] + 5, strategy_destribution_chart)
 # Save file on desktop
 wb.close()
 
