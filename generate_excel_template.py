@@ -78,14 +78,6 @@ data2 = np.zeros([3, 2],'<U1')
 
 # calculate strat distribution in table
 
-strat_name = f'=[[#This Row], [Strategy]]'
-
-
-
-
-strat_distribution_formula = f'=SUM({t1_name}[{strat_name}])' #todo - best way to choose for row?
-
-
 ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': t2_name, # todo add back in
                          'data': data2,
                          'columns': [{'header': 'Strategy'},
