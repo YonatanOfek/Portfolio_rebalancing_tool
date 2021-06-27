@@ -70,6 +70,16 @@ ws.conditional_format(pos_list_table_range, {'type':   'blanks', 'format': pleas
 
 # do something for puts and short assets
 # Put Price + Maximum ((20% 2* Underlying Price - Out of the Money Amount),(10% * Strike Price))
+put_market_value_formula = f'=[[#This Row],[Position]] *' \
+                           f' ([[#This Row],[Last]] +' \
+                           f' Max((0.4* [[#This Row],[Underlying Price]])' \
+                           f' - MAX(0,{strike_price}-[#This Row],[Underlying Price])),({strike_price} * 0.1)'
+
+
+=MAX(0,T24-V24)
+=0.2*T24-U24
+=V24*0.1
+=S24+MAX(W24,X24)*100
 
 
 # initialize t2
