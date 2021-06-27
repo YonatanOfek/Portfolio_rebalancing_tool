@@ -89,8 +89,12 @@ strat_distribution_formula = f'=SUM({t1_name}[{strat_name}])' #todo - best way t
 ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': t2_name, # todo add back in
                          'data': data2,
                          'columns': [{'header': 'Strategy'},
-                                    {'header': 'Portfolio Weight', 'formula': strat_distribution_formula}
+                                    {'header': 'Portfolio Weight'}
                                     ]})
+for i, j in zip([1,2,3],['Redhead', 'Workhorse', 'Safe']):
+    ws.write(topleft_corner_of_t2[0] + i , topleft_corner_of_t2[1], j)
+for i, j in zip([1,2,3],[f'=SUM({t1_name}[[#Data],[Redhead]])', f'=SUM({t1_name}[[#Data],[Workhorse]])', f'=SUM({t1_name}[[#Data],[Safe]])']):
+    ws.write_formula(topleft_corner_of_t2[0] + i , topleft_corner_of_t2[1] + 1, j)
 
 
 # plot a pie chart
