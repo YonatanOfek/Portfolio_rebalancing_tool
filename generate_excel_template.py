@@ -21,14 +21,24 @@ netliq_cell_loc = '$B$1'
 ws.write_formula(netliq_cell_loc, '=1000000') # todo
 ws.write('A2', 'USD Cash Position:')
 ws.write('B2', '')
-ws.set_column('U:U', width=115)
-ws.write('U1', 'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY',
+ws.set_column('V:V', width=115)
+ws.write('V1', 'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY',
          wb.add_format({'bold': True, 'bg_color':  'black', 'font_color':'red'}))
 data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_v2.csv")).values # todo why n = 59?
 
 
 t1_name = 'Position_list'
-market_value_formula = f'=[[#This Row],[Position]]*[[#This Row],[Last]]'
+
+stock_market_value_formula = f'=[[#This Row],[Position]]*[[#This Row],[Last]]'
+# do something for puts and short assets
+# Put Price + Maximum ((20% 2* Underlying Price - Out of the Money Amount),(10% * Strike Price))
+put_market_value_formula = f'=[[#This Row],[Position]] *' \
+                           f' ([[#This Row],[Last]] +' \
+                           f' Max((0.4* [[#This Row],[Underlying Price]])' \
+                           f' - MAX(0,[[#This Row],[Option Strike]]-[#This Row],[Underlying Price])),([[#This Row],[Option Strike]] * 0.1)'
+market_value_formula = f'=If(Not(Blank([[#This Row],[Option Strike]])),{put_market_value_formula},{stock_market_value_formula})'
+
+
 percent_netliq_formula = f'=([[#This Row],[Market Value]])/{netliq_cell_loc}'
 weighted_exposure_formula_redhead = f'=([[#This Row],[Market Value]])*([[#This Row],[Redhead %]])'
 weighted_exposure_formula_workhorse = f'=([[#This Row], [Market Value]])*([[#This Row], [Workhorse %]])'
@@ -45,13 +55,15 @@ ws.conditional_format('B2', {'type':   'blanks',
 
 # add table
 topleft_corner_of_t1 = [2, 1] # B1
-t1_range = [topleft_corner_of_t1[0], topleft_corner_of_t1[1], data.shape[0] + topleft_corner_of_t1[0], 11]
+t1_range = [topleft_corner_of_t1[0], topleft_corner_of_t1[1], data.shape[0] + topleft_corner_of_t1[0], 13]
 
 ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': f'{t1_name}',
                         'data': data,
                         'columns': [{'header': 'Financial Instrument'},
                                     {'header': 'Position'},
                                     {'header': 'Last'},
+                                    {'header': 'Underlying Price'},
+                                    {'header': 'Option Strike'},
                                     {'header': 'Market Value', 'formula': market_value_formula},
                                     {'header': '% of Net Liq', 'formula': percent_netliq_formula},
                                     {'header': 'Redhead %', 'format': cond_pleasefillin_format},
@@ -68,22 +80,17 @@ pos_list_table_range = ws.tables[0]['range']
 # add strat relationship columns using wizard - cond. formatting RED.
 ws.conditional_format(pos_list_table_range, {'type':   'blanks', 'format': pleasefillin_format})
 
-# do something for puts and short assets
-# Put Price + Maximum ((20% 2* Underlying Price - Out of the Money Amount),(10% * Strike Price))
-put_market_value_formula = f'=[[#This Row],[Position]] *' \
-                           f' ([[#This Row],[Last]] +' \
-                           f' Max((0.4* [[#This Row],[Underlying Price]])' \
-                           f' - MAX(0,{strike_price}-[#This Row],[Underlying Price])),({strike_price} * 0.1)'
+
 
 # initialize t2
 t2_name = 'Strat_distribution'
-topleft_corner_of_t2 = [2, 14] # N3
+topleft_corner_of_t2 = [2, 16] # N3
 t1_range = [topleft_corner_of_t2[0], topleft_corner_of_t2[1], topleft_corner_of_t2[0] + 3, topleft_corner_of_t2[1] + 1]
 data2 = np.zeros([3, 2],'<U1')
 
 # calculate strat distribution in table
 
-ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': t2_name, # todo add back in
+ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': t2_name,
                          'data': data2,
                          'columns': [{'header': 'Strategy'},
                                     {'header': 'Portfolio Weight'}
