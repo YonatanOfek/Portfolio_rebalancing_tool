@@ -35,7 +35,7 @@ stock_market_value_formula = f'=[[#This Row],[Position]]*[[#This Row],[Last]]'
 otm_component = f'MAX(0,[[#This Row],[Underlying Price]]-[[#This Row],[Option Strike]])'
 maxing_component = f'Max(0.2* [[#This Row],[Underlying Price]] - {otm_component},[[#This Row],[Option Strike]] * 0.1)'
 put_market_value_formula = f'=[[#This Row],[Position]]*(-100)*([[#This Row],[Last]]+{maxing_component})'
-
+call_market_value_formula = 0 # todo
 market_value_formula = f'=If([[#This Row],[Option Strike]] > 0,{put_market_value_formula},{stock_market_value_formula})'
 
 
