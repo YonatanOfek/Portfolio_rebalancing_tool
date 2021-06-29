@@ -29,14 +29,17 @@ data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_re
 
 t1_name = 'Position_list'
 
-stock_market_value_formula = f'=[[#This Row],[Position]]*[[#This Row],[Last]]'
+stock_market_value_component = f'[[#This Row],[Position]]*[[#This Row],[Last]]'
 # do something for puts and short assets
 # Put Price + Maximum ((20% 2* Underlying Price - Out of the Money Amount),(10% * Strike Price))
 otm_component = f'MAX(0,[[#This Row],[Underlying Price]]-[[#This Row],[Option Strike]])'
 maxing_component = f'Max(0.2* [[#This Row],[Underlying Price]] - {otm_component},[[#This Row],[Option Strike]] * 0.1)'
-put_market_value_formula = f'=[[#This Row],[Position]]*(-100)*([[#This Row],[Last]]+{maxing_component})'
+short_put_market_value_component = f'[[#This Row],[Position]]*(-100)*([[#This Row],[Last]]+{maxing_component})'
+put_market_value_formula = 0 # todo
+short_call_market_value_formula = 0 # todo
 call_market_value_formula = 0 # todo
-market_value_formula = f'=If([[#This Row],[Option Strike]] > 0,{put_market_value_formula},{stock_market_value_formula})'
+
+polymorphic_market_value_formula = f'=If([[#This Row],[Option Strike]] > 0,{short_put_market_value_component},{stock_market_value_component})'
 
 
 percent_netliq_formula = f'=([[#This Row],[Market Value]])/{netliq_cell_loc}'
@@ -64,7 +67,7 @@ ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': f'{t1_
                                     {'header': 'Last'},
                                     {'header': 'Underlying Price'},
                                     {'header': 'Option Strike'},
-                                    {'header': 'Market Value', 'formula': put_market_value_formula},
+                                    {'header': 'Market Value', 'formula': polymorphic_market_value_formula},
                                     {'header': '% of Net Liq', 'formula': percent_netliq_formula},
                                     {'header': 'Redhead %', 'format': cond_pleasefillin_format},
                                     {'header': 'Workhorse %', 'format': cond_pleasefillin_format},
