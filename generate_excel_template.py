@@ -109,12 +109,12 @@ class CurrentPortfolioWorksheet(Worksheet):
         return [2, self.portfolio_export_data.shape[1] + 10] # todo add xl to row here too..
 
     @property
-    def t1_range(self):
+    def pos_list_table_range(self):
         return [self.topleft_corner_of_t1[0], self.topleft_corner_of_t1[1],
                 self.portfolio_export_data.shape[0] + self.topleft_corner_of_t1[0], self.portfolio_export_data.shape[1] + 8]
 
     @property
-    def t2_range(self):
+    def strat_list_table_range(self):
         return [self.topleft_corner_of_t2[0], self.topleft_corner_of_t2[1], self.topleft_corner_of_t2[0] + 3,
                 self.topleft_corner_of_t2[1] + 1]
 
@@ -135,7 +135,7 @@ class CurrentPortfolioWorksheet(Worksheet):
 
     def add_positions_list_table(self):
 
-        self.add_table(self.t1_range[0], self.t1_range[1], self.t1_range[2], self.t1_range[3], {'name': f'{self.pos_table_name}',
+        self.add_table(self.pos_list_table_range[0], self.pos_list_table_range[1], self.pos_list_table_range[2], self.pos_list_table_range[3], {'name': f'{self.pos_table_name}',
                                                                           'data': self.portfolio_export_data,
                                                                           'columns': [
                                                                               {'header': 'Financial Instrument'}, # todo get these headers programmatically after switching data from a df.values into a df
@@ -162,11 +162,11 @@ class CurrentPortfolioWorksheet(Worksheet):
 
         return # todo returns
 
-    def add_strategies_table(self, strategy_names):
+    def add_strategies_table(self): # todo add polymorphism strategy_names):
         # data2 = np.zeros([3, 2], '<U1') todo not need this right?
 
-        self.add_table(self.t1_range[0], self.t1_range[1], self.t1_range[2], self.t1_range[3], {'name': self.strat_table_name,
-                                                                            # 'data': data2 todo not need this right?
+        self.add_table(self.strat_list_table_range[0], self.strat_list_table_range[1], self.strat_list_table_range[2], self.strat_list_table_range[3], {'name': self.strat_table_name,
+                                                                                                                                                # 'data': data2 todo not need this right?
                                                                             'columns': [{'header': 'Strategy'},
                                                                                         {'header': 'Portfolio Weight'}
                                                                                         ]})
@@ -198,27 +198,41 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
     generates during its run.
     """
 
-    def __init__(self, portfolio_export_data, filename=None, options=None):
-        super().__init__(filename, options)
-        self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet)
+    # def __init__(self, portfolio_export_data, filename=None, options=None):
+    #     super().__init__(filename, options)
+    #     self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet)
 
     @property
     def input_is_required_format(self):
         return self.add_format({'bg_color': '#FFC7CE'})
 
-    def add_formatting(self):
-        self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
-                                                                                  'format': self.input_is_required_format})
-        self.curr_port_ws.write('V1', wb.add_format({'bold': True, 'bg_color': 'black', 'font_color': 'red'}))
-        self.curr_port_ws.conditional_format(self.curr_port_ws.pos_list_table_range,
-                                             {'type': 'blanks', 'format': self.input_is_required_format})
+    # def add_formatting(self):
+    #     self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
+    #                                                                               'format': self.input_is_required_format})
+    #     self.curr_port_ws.conditional_format('V1', {'type':'text', 'criteria': 'containing', 'value':'Note',
+    #                                                 'format':wb.add_format({'bold': True, 'bg_color': 'black',
+    #                                                                         'font_color': 'red'})})
+    #     range_for_table = self.curr_port_ws.tables[0]['range']
+    #     self.curr_port_ws.conditional_format(range_for_table,
+    #                                          {'type': 'blanks', 'format': self.input_is_required_format})
+
     def create_curr_port_worksh(self, portfolio_export_data):
-        self.curr_port_ws.add_warnings_and_misc_cells(portfolio_export_data)
+        self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet)
+        self.curr_port_ws.load_portfolio_export_data(portfolio_export_data)
+        self.curr_port_ws.add_warnings_and_misc_cells()
         self.curr_port_ws.add_positions_list_table()
         self.curr_port_ws.add_strategies_table()
         self.curr_port_ws.add_strat_dist_chart()
-        self.add_formatting()
+        self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
+                                                                                  'format': self.input_is_required_format})
+        self.curr_port_ws.conditional_format('V1', {'type': 'text', 'criteria': 'containing', 'value': 'Note',
+                                                    'format': wb.add_format({'bold': True, 'bg_color': 'black',
+                                                                             'font_color': 'red'})})
+        range_for_table = self.curr_port_ws.tables[0]['range']
+        self.curr_port_ws.conditional_format(range_for_table,
+                                             {'type': 'blanks', 'format': self.input_is_required_format})
 
+        self.close()
         return # todo returns
 
 if __name__ == '__main__':
@@ -228,6 +242,6 @@ if __name__ == '__main__':
     workbook_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/Portfolio_mgmt_testing.xlsx'
     wb = PortfolioBalanceWorkbook(workbook_filename, {'nan_inf_to_errors': True})
     wb.create_curr_port_worksh(data_)
-    wb.close()
+
 
 
