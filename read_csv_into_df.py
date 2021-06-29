@@ -27,6 +27,7 @@ def filter_data(df_):
     df_['Option Strike'] = df_['Financial Instrument'].map(func_)
     return df_
 
+
 def rearrange_columns(df_):
     option_strike = pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name='Option Strike')
     netliq_cont = pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name='Netliq Contribution')
@@ -35,6 +36,7 @@ def rearrange_columns(df_):
                       'Netliq Contribution']
 
     return pd.concat([df_[key] for key in target_columns], axis=1)
+
 
 def read_csv_export(export_filename: str): # todo refactor into nice pipe
     df_ = pd.read_csv(export_filename)
