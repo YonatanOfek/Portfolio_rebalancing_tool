@@ -165,9 +165,6 @@ class CurrentPortfolioWorksheet(Worksheet):
                                                                               ]})
 
         pos_list_table_range = self.tables[0]['range'] # todo do I need this considering pos_table_range
-        # add strat relationship columns using wizard - cond. formatting RED.
-        self.curr_port_ws.conditional_format(pos_list_table_range, {'type': 'blanks', 'format': self.input_is_required_format}) # todo
-
 
         return # todo returns
 
@@ -219,7 +216,8 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
         self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
                                                                                   'format': self.input_is_required_format})
         self.curr_port_ws.write('V1', wb.add_format({'bold': True, 'bg_color': 'black', 'font_color': 'red'}))
-
+        self.curr_port_ws.conditional_format(self.curr_port_ws.pos_list_table_range,
+                                             {'type': 'blanks', 'format': self.input_is_required_format})
     def create_curr_port_worksh(self):
         self.curr_port_ws.add_warnings_and_misc_cells()
         self.curr_port_ws.add_positions_list_table()
