@@ -7,8 +7,7 @@ import numpy as np
 
 class CurrentPortfolioWorksheet(Worksheet):
 
-    def __init__(self, portfolio_export_data):
-        super().__init__()
+    def load_portfolio_export_data(self, portfolio_export_data):
         self.portfolio_export_data = portfolio_export_data
 
     @property
@@ -209,7 +208,7 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
 
     def __init__(self, portfolio_export_data, filename=None, options=None):
         super().__init__(filename, options)
-        self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet, data=portfolio_export_data)
+        self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet)
 
     @property
     def input_is_required_format(self):
@@ -220,7 +219,8 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
                                                                                   'format': self.input_is_required_format})
         self.curr_port_ws.write('V1', wb.add_format({'bold': True, 'bg_color': 'black', 'font_color': 'red'}))
 
-    def create_curr_port_worksh(self):
+    def create_curr_port_worksh(self, portfolio_export_data):
+        self.curr_port_ws.load_portfolio_export_data(portfolio_export_data)
         self.curr_port_ws.add_warnings_and_misc_cells()
         self.curr_port_ws.add_positions_list_table()
         self.curr_port_ws.add_strategies_table()
