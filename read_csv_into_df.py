@@ -15,13 +15,8 @@ def read_csv_export(export_filename: str):
     df2 = df2.replace({'Underlying Price': np.nan}, '0', regex=True)
 
     # Add "Option Flag" and "Option Strike" column to df
-    option_flag = option_flag = pd.Series(np.zeros((df2.shape[0]),dtype='1>U'), name='Option_Flag')
     option_strike = pd.Series(np.zeros((df2.shape[0]), dtype='1>U'), name='Option_Strike')
-    df2 = pd.concat([df2, option_flag, option_strike], axis=1)
-
-    mask = df2['Financial Instrument'].str.contains('[Cc][Aa][Ll][Ll]|[Pp][Uu][Tt]')
-    mask = mask.replace({True: False, False: True})  # df.where() replaces where the condition is false...
-    df2['Option_Flag'] = df2['Option_Flag'].where(mask, True)
+    df2 = pd.concat([df2, option_strike], axis=1)
 
     def func_(x):
         string_list = re.findall('\s\d{1,4}\s|\s\d{1,4}\.\d{1,4}\s', x)
