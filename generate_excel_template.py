@@ -139,7 +139,7 @@ class CurrentPortfolioWorksheet(Worksheet):
         self.add_table(self.t1_range[0], self.t1_range[1], self.t1_range[2], self.t1_range[3], {'name': f'{self.pos_table_name}',
                                                                           'data': self.portfolio_export_data,
                                                                           'columns': [
-                                                                              {'header': 'Financial Instrument'}, # todo get these programmatically after switching data from a df.values into a df
+                                                                              {'header': 'Financial Instrument'}, # todo get these headers programmatically after switching data from a df.values into a df
                                                                               {'header': 'Position'},
                                                                               {'header': 'Last'},
                                                                               {'header': 'Underlying Price'},
@@ -150,12 +150,9 @@ class CurrentPortfolioWorksheet(Worksheet):
                                                                                'formula': f'={self.polymorphic_netliq_contribution_formula}'},
                                                                               {'header': '% of Net Liq',
                                                                                'formula': f'={self.percent_netliq_formula}'},
-                                                                              {'header': 'Redhead %',
-                                                                               'format': f'={self.cond_pleasefillin_format}'}, # todo wb/ws problem
-                                                                              {'header': 'Workhorse %',
-                                                                               'format': f'={self.cond_pleasefillin_format}'},
-                                                                              {'header': 'Safe %',
-                                                                               'format': f'={self.cond_pleasefillin_format}'},
+                                                                              {'header': 'Redhead %'},
+                                                                              {'header': 'Workhorse %'},
+                                                                              {'header': 'Safe %'},
                                                                               {'header': 'Redhead',
                                                                                'formula': f'={self.weighted_exposure_formula_redhead}'}, # todo add some polymorphism
                                                                               {'header': 'Workhorse',
@@ -163,8 +160,6 @@ class CurrentPortfolioWorksheet(Worksheet):
                                                                               {'header': 'Safe',
                                                                                'formula': f'={self.weighted_exposure_formula_safe}'}
                                                                               ]})
-
-        pos_list_table_range = self.tables[0]['range'] # todo do I need this considering pos_table_range
 
         return # todo returns
 
