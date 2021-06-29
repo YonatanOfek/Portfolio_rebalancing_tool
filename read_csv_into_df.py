@@ -13,6 +13,7 @@ def read_csv_export(export_filename: str):
     df2 = df2.replace({'Last': np.nan}, '0', regex=True)
     df2 = df2.replace({'Underlying Price': '[A-Za-z]'}, '', regex=True)
     df2 = df2.replace({'Underlying Price': np.nan}, '0', regex=True)
+    df2 = df2.replace({'Underlying Price': ''}, '0', regex=True)
 
     # Add "Option Flag" and "Option Strike" column to df
     option_strike = pd.Series(np.zeros((df2.shape[0]), dtype='1>U'), name='Option_Strike')
@@ -23,8 +24,8 @@ def read_csv_export(export_filename: str):
         if len(string_list) == 1:
             return float(string_list[0])
         else:
-            return ''
-    df2['Option Strike'] = df2['Financial Instrument'].map(func_)
+            return 0
+    df2['Option_Strike'] = df2['Financial Instrument'].map(func_)
 
     return df2
 
