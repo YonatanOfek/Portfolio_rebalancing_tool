@@ -24,8 +24,11 @@ short_put_market_value_component = f'[[#This Row],[Position]]*(-100)*([[#This Ro
 put_market_value_formula = 0 # todo
 short_call_market_value_formula = 0 # todo
 call_market_value_formula = 0 # todo
-
 polymorphic_market_value_formula = f'=If([[#This Row],[Option Strike]] > 0,{short_put_market_value_component},{stock_market_value_component})'
+
+short_option_netliq_contribution_component = '(-100)*[[#This Row],[Last]]*[[#This Row],[Position]]'
+stock_netliq_contribution_component = '[[#This Row],[Market Value]]'
+polymorphic_netliq_contribution_formula = f'=If([[#This Row],[Option Strike]] > 0,{short_option_netliq_contribution_component},{stock_netliq_contribution_component})'
 
 netliq_cell_loc = '$B$1'
 usdcash_cell_loc = '$B$2'
@@ -45,7 +48,7 @@ ws.conditional_format('B2', {'type':   'blanks',
 
 # add table
 topleft_corner_of_t1 = [2, 1] # B1
-t1_range = [topleft_corner_of_t1[0], topleft_corner_of_t1[1], data.shape[0] + topleft_corner_of_t1[0], 13]
+t1_range = [topleft_corner_of_t1[0], topleft_corner_of_t1[1], data.shape[0] + topleft_corner_of_t1[0], data.shape[1]+8]
 
 ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': f'{t1_name}',
                         'data': data,
@@ -55,6 +58,7 @@ ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': f'{t1_
                                     {'header': 'Underlying Price'},
                                     {'header': 'Option Strike'},
                                     {'header': 'Market Value', 'formula': polymorphic_market_value_formula},
+                                    {'header': 'Netliq Contribution', 'formula': polymorphic_netliq_contribution_formula},
                                     {'header': '% of Net Liq', 'formula': percent_netliq_formula},
                                     {'header': 'Redhead %', 'format': cond_pleasefillin_format},
                                     {'header': 'Workhorse %', 'format': cond_pleasefillin_format},
@@ -74,7 +78,7 @@ ws.conditional_format(pos_list_table_range, {'type':   'blanks', 'format': pleas
 
 # initialize t2
 t2_name = 'Strat_distribution'
-topleft_corner_of_t2 = [2, 16] # N3
+topleft_corner_of_t2 = [2, data.shape[1]+10]
 t1_range = [topleft_corner_of_t2[0], topleft_corner_of_t2[1], topleft_corner_of_t2[0] + 3, topleft_corner_of_t2[1] + 1]
 data2 = np.zeros([3, 2],'<U1')
 
@@ -105,12 +109,12 @@ ws.insert_chart(topleft_corner_of_t2[0], topleft_corner_of_t2[1] + 5, strategy_d
 
 ws.write('A1', 'Net Liquidity:')
 
-ws.write_formula(netliq_cell_loc, f'={usdcash_cell_loc} + SUM({t1_name}[[#Data],[Market Value]])') # todo this is dumb because doesn't consider premia given from put options rather margin load...
+ws.write_formula(netliq_cell_loc, f'={usdcash_cell_loc} + SUM({t1_name}[[#Data],[Netliq Contribution]])') # todo this is dumb because doesn't consider premia given from put options rather margin load...
 
 ws.write('A2', 'USD Cash Position:')
 ws.write('B2', '')
-ws.set_column('V:V', width=115)
-ws.write('V1',
+ws.set_column(data.shape[1]+15, data.shape[1]+15,  width=115)
+ws.write(0, data.shape[1]+15,
          'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY',
          wb.add_format({'bold': True, 'bg_color': 'black', 'font_color': 'red'}))
 
