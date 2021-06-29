@@ -138,7 +138,7 @@ class CurrentPortfolioWorksheet(Worksheet):
         self.add_table(self.t1_range[0], self.t1_range[1], self.t1_range[2], self.t1_range[3], {'name': f'{self.pos_table_name}',
                                                                           'data': self.portfolio_export_data,
                                                                           'columns': [
-                                                                              {'header': 'Financial Instrument'}, # todo get these programmatically after switching data from a df.values into a df
+                                                                              {'header': 'Financial Instrument'}, # todo get these headers programmatically after switching data from a df.values into a df
                                                                               {'header': 'Position'},
                                                                               {'header': 'Last'},
                                                                               {'header': 'Underlying Price'},
@@ -149,12 +149,9 @@ class CurrentPortfolioWorksheet(Worksheet):
                                                                                'formula': f'={self.polymorphic_netliq_contribution_formula}'},
                                                                               {'header': '% of Net Liq',
                                                                                'formula': f'={self.percent_netliq_formula}'},
-                                                                              {'header': 'Redhead %',
-                                                                               'format': f'={self.cond_pleasefillin_format}'}, # todo wb/ws problem
-                                                                              {'header': 'Workhorse %',
-                                                                               'format': f'={self.cond_pleasefillin_format}'},
-                                                                              {'header': 'Safe %',
-                                                                               'format': f'={self.cond_pleasefillin_format}'},
+                                                                              {'header': 'Redhead %'},
+                                                                              {'header': 'Workhorse %'},
+                                                                              {'header': 'Safe %'},
                                                                               {'header': 'Redhead',
                                                                                'formula': f'={self.weighted_exposure_formula_redhead}'}, # todo add some polymorphism
                                                                               {'header': 'Workhorse',
@@ -162,11 +159,6 @@ class CurrentPortfolioWorksheet(Worksheet):
                                                                               {'header': 'Safe',
                                                                                'formula': f'={self.weighted_exposure_formula_safe}'}
                                                                               ]})
-
-        pos_list_table_range = self.tables[0]['range'] # todo do I need this considering pos_table_range
-        # add strat relationship columns using wizard - cond. formatting RED.
-        self.curr_port_ws.conditional_format(pos_list_table_range, {'type': 'blanks', 'format': self.input_is_required_format}) # todo
-
 
         return # todo returns
 
@@ -218,10 +210,10 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
         self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
                                                                                   'format': self.input_is_required_format})
         self.curr_port_ws.write('V1', wb.add_format({'bold': True, 'bg_color': 'black', 'font_color': 'red'}))
-
+        self.curr_port_ws.conditional_format(self.curr_port_ws.pos_list_table_range,
+                                             {'type': 'blanks', 'format': self.input_is_required_format})
     def create_curr_port_worksh(self, portfolio_export_data):
-        self.curr_port_ws.load_portfolio_export_data(portfolio_export_data)
-        self.curr_port_ws.add_warnings_and_misc_cells()
+        self.curr_port_ws.add_warnings_and_misc_cells(portfolio_export_data)
         self.curr_port_ws.add_positions_list_table()
         self.curr_port_ws.add_strategies_table()
         self.curr_port_ws.add_strat_dist_chart()
