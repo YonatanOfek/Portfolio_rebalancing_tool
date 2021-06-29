@@ -3,7 +3,7 @@ import pathlib
 import re
 import numpy as np
 
-def read_csv_export(export_filename: str):
+def read_csv_export(export_filename: str): # todo
     df_ = pd.read_csv(export_filename)
     target_columns = ['Financial Instrument', 'Position', 'Last', 'Underlying Price']
     df2 = pd.concat([df_[key] for key in target_columns], axis=1)

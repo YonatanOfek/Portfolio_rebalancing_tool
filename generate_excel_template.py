@@ -200,21 +200,21 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
 
     # def __init__(self, portfolio_export_data, filename=None, options=None):
     #     super().__init__(filename, options)
-    #     self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet)
+    #     self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet) todo
 
     @property
     def input_is_required_format(self):
         return self.add_format({'bg_color': '#FFC7CE'})
 
-    # def add_formatting(self):
-    #     self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
-    #                                                                               'format': self.input_is_required_format})
-    #     self.curr_port_ws.conditional_format('V1', {'type':'text', 'criteria': 'containing', 'value':'Note',
-    #                                                 'format':wb.add_format({'bold': True, 'bg_color': 'black',
-    #                                                                         'font_color': 'red'})})
-    #     range_for_table = self.curr_port_ws.tables[0]['range']
-    #     self.curr_port_ws.conditional_format(range_for_table,
-    #                                          {'type': 'blanks', 'format': self.input_is_required_format})
+    def add_formatting(self):
+        self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
+                                                                                  'format': self.input_is_required_format})
+        self.curr_port_ws.conditional_format('V1', {'type':'text', 'criteria': 'containing', 'value':'Note',
+                                                    'format':wb.add_format({'bold': True, 'bg_color': 'black',
+                                                                            'font_color': 'red'})})
+        range_for_table = self.curr_port_ws.tables[0]['range']
+        self.curr_port_ws.conditional_format(range_for_table,
+                                             {'type': 'blanks', 'format': self.input_is_required_format})
 
     def create_curr_port_worksh(self, portfolio_export_data):
         self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet)
@@ -223,17 +223,10 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
         self.curr_port_ws.add_positions_list_table()
         self.curr_port_ws.add_strategies_table()
         self.curr_port_ws.add_strat_dist_chart()
-        self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
-                                                                                  'format': self.input_is_required_format})
-        self.curr_port_ws.conditional_format('V1', {'type': 'text', 'criteria': 'containing', 'value': 'Note',
-                                                    'format': wb.add_format({'bold': True, 'bg_color': 'black',
-                                                                             'font_color': 'red'})})
-        range_for_table = self.curr_port_ws.tables[0]['range']
-        self.curr_port_ws.conditional_format(range_for_table,
-                                             {'type': 'blanks', 'format': self.input_is_required_format})
-
+        self.add_formatting()
         self.close()
         return # todo returns
+
 
 if __name__ == '__main__':
     data_filename = pathlib.Path(
