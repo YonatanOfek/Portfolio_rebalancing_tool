@@ -44,6 +44,7 @@ def read_csv_export(export_filename: str): # todo refactor into nice pipe
     df2 = filter_data(df2)
     return df2
 
+
 if __name__ == '__main__':
     # filename = pathlib.Path(
     #     "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing.csv")
