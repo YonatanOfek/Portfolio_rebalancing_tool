@@ -8,22 +8,8 @@ wb = xlsxwriter.Workbook('C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_t
 ws = wb.add_worksheet('Data')
 
 
-
-# STRAT_LIST = ["Safe", "Workhorse", "Redhead"]
 # initate a table for one position and generate all the formulas
 
-
-# initiate headers
-# headers = ['Financial Instrument', 'Position', 'Last', 'Market Value', '% of Net Liq'] + STRAT_LIST
-
-ws.write('A1', 'Net Liquidity:')
-netliq_cell_loc = '$B$1'
-ws.write_formula(netliq_cell_loc, '=1000000') # todo
-ws.write('A2', 'USD Cash Position:')
-ws.write('B2', '')
-ws.set_column('V:V', width=115)
-ws.write('V1', 'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY',
-         wb.add_format({'bold': True, 'bg_color':  'black', 'font_color':'red'}))
 data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_v2.csv")).values # todo why n = 59?
 
 
@@ -41,7 +27,8 @@ call_market_value_formula = 0 # todo
 
 polymorphic_market_value_formula = f'=If([[#This Row],[Option Strike]] > 0,{short_put_market_value_component},{stock_market_value_component})'
 
-
+netliq_cell_loc = '$B$1'
+usdcash_cell_loc = '$B$2'
 percent_netliq_formula = f'=([[#This Row],[Market Value]])/{netliq_cell_loc}'
 weighted_exposure_formula_redhead = f'=([[#This Row],[Market Value]])*([[#This Row],[Redhead %]])'
 weighted_exposure_formula_workhorse = f'=([[#This Row], [Market Value]])*([[#This Row], [Workhorse %]])'
@@ -113,6 +100,20 @@ strategy_destribution_chart.add_series({
     'data_labels': {'percentage': True},
 })
 ws.insert_chart(topleft_corner_of_t2[0], topleft_corner_of_t2[1] + 5, strategy_destribution_chart)
+
+# Add notes and netliq, cash
+
+ws.write('A1', 'Net Liquidity:')
+
+ws.write_formula(netliq_cell_loc, f'={usdcash_cell_loc} + SUM({t1_name}[[#Data],[Market Value]])') # todo this is dumb because doesn't consider premia given from put options rather margin load...
+
+ws.write('A2', 'USD Cash Position:')
+ws.write('B2', '')
+ws.set_column('V:V', width=115)
+ws.write('V1',
+         'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY',
+         wb.add_format({'bold': True, 'bg_color': 'black', 'font_color': 'red'}))
+
 # Save file on desktop
 wb.close()
 
