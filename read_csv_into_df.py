@@ -3,27 +3,20 @@ import pathlib
 import re
 import numpy as np
 
-def read_csv_export(export_filename: str): # todo
-    df_ = pd.read_csv(export_filename)
-    target_columns = ['Financial Instrument', 'Position', 'Last', 'Underlying Price']
-    df2 = pd.concat([df_[key] for key in target_columns], axis=1)
 
-    # Filter alphabetical chars and nan from 'Last'
-    df2 = df2.replace({'Position': ','}, '', regex=True)
-    df2 = df2.replace({'Last':'[A-Za-z]'}, '', regex=True)
-    df2 = df2.replace({'Last': np.nan}, '0', regex=True)
-    df2 = df2.replace({'Underlying Price': '[A-Za-z]'}, '', regex=True)
-    df2 = df2.replace({'Underlying Price': ''}, '0', regex=True)
-    df2 = df2.replace({'Underlying Price': np.nan}, '', regex=True) # todo - super weird tws bug where sometimes this returns for stocks...
-    df2['Position'] = df2['Position'].astype(float)
-    df2['Last'] = df2['Last'].where(lambda x: x != '', 0).astype(float)
-    df2 = df2.replace({'Last': 0}, '')
-    df2['Underlying Price'] = df2['Underlying Price'].where(lambda x: x != '', 0).astype(float)
-    df2 = df2.replace({'Underlying Price': 0}, '')
-    # Add "Option Flag" and "Option Strike" column to df
-    option_strike = pd.Series(np.zeros((df2.shape[0]), dtype='1>U'), name='Option Strike')
-    netliq_cont = pd.Series(np.zeros((df2.shape[0]), dtype='1>U'), name='Netliq Contribution')
-    df2 = pd.concat([df2, option_strike,netliq_cont], axis=1)
+def filter_data(df_):
+
+    df_ = df_.replace({'Position': ','}, '', regex=True)
+    df_ = df_.replace({'Last': '[A-Za-z]'}, '', regex=True)
+    df_ = df_.replace({'Last': np.nan}, '0', regex=True)
+    df_ = df_.replace({'Underlying Price': '[A-Za-z]'}, '', regex=True)
+    df_ = df_.replace({'Underlying Price': ''}, '0', regex=True)
+    df_ = df_.replace({'Underlying Price': np.nan}, '', regex=True)
+    df_['Position'] = df_['Position'].astype(float)
+    df_['Last'] = df_['Last'].where(lambda x: x != '', 0).astype(float)
+    df_ = df_.replace({'Last': 0}, '')
+    df_['Underlying Price'] = df_['Underlying Price'].where(lambda x: x != '', 0).astype(float)
+    df_ = df_.replace({'Underlying Price': 0}, '')
 
     def func_(x):
         string_list = re.findall('\s\d{1,4}\s|\s\d{1,4}\.\d{1,4}\s', x)
@@ -31,10 +24,23 @@ def read_csv_export(export_filename: str): # todo
             return float(string_list[0])
         else:
             return 0
+    df_['Option Strike'] = df_['Financial Instrument'].map(func_)
+    return df_
 
-    df2['Option Strike'] = df2['Financial Instrument'].map(func_)
+def rearrange_columns(df_):
+    option_strike = pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name='Option Strike')
+    netliq_cont = pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name='Netliq Contribution')
+    df_ = pd.concat([df_, option_strike, netliq_cont], axis=1)
+    target_columns = ['Financial Instrument', 'Position', 'Last', 'Underlying Price', 'Option Strike',
+                      'Netliq Contribution']
+
+    return pd.concat([df_[key] for key in target_columns], axis=1)
+
+def read_csv_export(export_filename: str): # todo refactor into nice pipe
+    df_ = pd.read_csv(export_filename)
+    df2 = rearrange_columns(df_)
+    df2 = filter_data(df2)
     return df2
-
 
 if __name__ == '__main__':
     # filename = pathlib.Path(
