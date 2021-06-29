@@ -12,8 +12,9 @@ def read_csv_export(export_filename: str):
     df2 = df2.replace({'Last':'[A-Za-z]'}, '', regex=True)
     df2 = df2.replace({'Last': np.nan}, '0', regex=True)
     df2 = df2.replace({'Underlying Price': '[A-Za-z]'}, '', regex=True)
-    df2 = df2.replace({'Underlying Price': np.nan}, '0', regex=True)
     df2 = df2.replace({'Underlying Price': ''}, '0', regex=True)
+    df2 = df2.replace({'Underlying Price': np.nan}, '', regex=True) # todo - super weird bug where sometimes this returns for stocks...
+
 
     # Add "Option Flag" and "Option Strike" column to df
     option_strike = pd.Series(np.zeros((df2.shape[0]), dtype='1>U'), name='Option_Strike')

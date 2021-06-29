@@ -32,11 +32,11 @@ t1_name = 'Position_list'
 stock_market_value_formula = f'=[[#This Row],[Position]]*[[#This Row],[Last]]'
 # do something for puts and short assets
 # Put Price + Maximum ((20% 2* Underlying Price - Out of the Money Amount),(10% * Strike Price))
-put_market_value_formula = f'=[[#This Row],[Position]] *' \
-                           f' ([[#This Row],[Last]] +' \
-                           f' Max((0.4* [[#This Row],[Underlying Price]])' \
-                           f' - MAX(0,[[#This Row],[Option Strike]]-[#This Row],[Underlying Price])),([[#This Row],[Option Strike]] * 0.1)'
-market_value_formula = f'=If(Not(Blank([[#This Row],[Option Strike]])),{put_market_value_formula},{stock_market_value_formula})'
+otm_component = f'MAX(0,[[#This Row],[Underlying Price]]-[[#This Row],[Option Strike]])'
+maxing_component = f'Max(0.2* [[#This Row],[Underlying Price]] - {otm_component},[[#This Row],[Option Strike]] * 0.1)'
+put_market_value_formula = f'=[[#This Row],[Position]]*(-100)*([[#This Row],[Last]]+{maxing_component})'
+
+market_value_formula = f'=If([[#This Row],[Option Strike]] > 0,{put_market_value_formula},{stock_market_value_formula})'
 
 
 percent_netliq_formula = f'=([[#This Row],[Market Value]])/{netliq_cell_loc}'
@@ -64,7 +64,7 @@ ws.add_table(t1_range[0], t1_range[1], t1_range[2], t1_range[3], {'name': f'{t1_
                                     {'header': 'Last'},
                                     {'header': 'Underlying Price'},
                                     {'header': 'Option Strike'},
-                                    {'header': 'Market Value', 'formula': market_value_formula},
+                                    {'header': 'Market Value', 'formula': put_market_value_formula},
                                     {'header': '% of Net Liq', 'formula': percent_netliq_formula},
                                     {'header': 'Redhead %', 'format': cond_pleasefillin_format},
                                     {'header': 'Workhorse %', 'format': cond_pleasefillin_format},
