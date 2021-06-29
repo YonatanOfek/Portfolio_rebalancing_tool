@@ -24,7 +24,7 @@ ws.write('B2', '')
 ws.set_column('U:U',width=115)
 ws.write('U1', 'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY',
          wb.add_format({'bold': True, 'bg_color':  'black', 'font_color':'red'}))
-data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing.csv")).values # todo why n = 59?
+data = read_csv_export(pathlib.Path("C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_v2.csv")).values # todo why n = 59?
 
 
 t1_name = 'Position_list'
@@ -74,13 +74,6 @@ put_market_value_formula = f'=[[#This Row],[Position]] *' \
                            f' ([[#This Row],[Last]] +' \
                            f' Max((0.4* [[#This Row],[Underlying Price]])' \
                            f' - MAX(0,{strike_price}-[#This Row],[Underlying Price])),({strike_price} * 0.1)'
-
-
-=MAX(0,T24-V24)
-=0.2*T24-U24
-=V24*0.1
-=S24+MAX(W24,X24)*100
-
 
 # initialize t2
 t2_name = 'Strat_distribution'
