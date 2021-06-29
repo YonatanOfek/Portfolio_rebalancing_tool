@@ -213,7 +213,7 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
         self.curr_port_ws.write('V1', wb.add_format({'bold': True, 'bg_color': 'black', 'font_color': 'red'}))
         self.curr_port_ws.conditional_format(self.curr_port_ws.pos_list_table_range,
                                              {'type': 'blanks', 'format': self.input_is_required_format})
-    def create_curr_port_worksh(self):
+    def create_curr_port_worksh(self, portfolio_export_data):
         self.curr_port_ws.add_warnings_and_misc_cells()
         self.curr_port_ws.add_positions_list_table()
         self.curr_port_ws.add_strategies_table()
