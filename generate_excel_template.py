@@ -13,17 +13,9 @@ class CurrentPortfolioWorksheet(Worksheet):
         self.list_of_strats = list_of_strats
 
     @property
-    def netliq_cell_loc(self):
-        return '$B$1'
-    
-    @property
-    def usdcash_cell_loc(self):
-        return '$B$2'
-    
-    @property
     def pos_table_name(self):
         return 'Position_list'
-    
+
     @property
     def strat_table_name(self):
         return 'Strat_distribution'
@@ -35,31 +27,31 @@ class CurrentPortfolioWorksheet(Worksheet):
     @property
     def stock_market_value_formula(self):
         return f'[[#This Row],[Position]]*[[#This Row],[Last]]'
-    
+
     @property
     def otm_formula(self):
         return f'MAX(0,[[#This Row],[Underlying Price]]-[[#This Row],[Option Strike]])'
-    
+
     @property
     def maxing_formula(self):
         return f'Max(0.2* [[#This Row],[Underlying Price]] - {self.otm_formula},[[#This Row],[Option Strike]] * 0.1)'
-    
+
     @property
     def short_put_market_value_formula(self):
         return f'[[#This Row],[Position]]*(-100)*([[#This Row],[Last]]+{self.maxing_formula})'
-    
+
     @property
     def put_market_value_formula(self):
         return 0  # todo v3
-    
+
     @property
     def short_call_market_value_formula(self):
         return 0  # todo v3
-    
+
     @property
     def call_market_value_formula(self):
         return 0  # todo v3
-    
+
     @property
     def polymorphic_market_value_formula(self):
         return f'If([[#This Row],[Option Strike]] > 0,{self.short_put_market_value_formula},{self.stock_market_value_formula})'
@@ -67,11 +59,11 @@ class CurrentPortfolioWorksheet(Worksheet):
     @property
     def short_option_netliq_contribution_formula(self):
         return '(-100)*[[#This Row],[Last]]*[[#This Row],[Position]]'
-    
+
     @property
     def stock_netliq_contribution_formula(self):
         return '[[#This Row],[Market Value]]'
-    
+
     @property
     def polymorphic_netliq_contribution_formula(self):
         return f'If([[#This Row],[Option Strike]] > 0,{self.short_option_netliq_contribution_formula},{self.stock_netliq_contribution_formula})'
@@ -79,18 +71,12 @@ class CurrentPortfolioWorksheet(Worksheet):
     @property
     def percent_netliq_formula(self):
         return f'([[#This Row],[Market Value]])/{self.netliq_cell_loc}'
-    
-    @property
-    def weighted_exposure_formula_redhead(self):
-        return f'([[#This Row],[Market Value]])*([[#This Row],[Redhead %]])'
-    
-    @property
-    def weighted_exposure_formula_workhorse(self):
-        return f'([[#This Row], [Market Value]])*([[#This Row], [Workhorse %]])'
-    
-    @property
-    def weighted_exposure_formula_safe(self):
-        return f'([[#This Row], [Market Value]])*([[#This Row],[Safe %]])'
+
+    def weighted_exposure_formula(self, column_header):
+        return f'([[#This Row],[Market Value]])*([[#This Row],[{column_header}]])'
+
+    def strat_summing_formula(self, strat_name):
+        return f'SUM({self.pos_table_name}[[#Data],[{strat_name}]])'
 
     @property
     def redhead_strat_summing_formula(self):
@@ -105,24 +91,54 @@ class CurrentPortfolioWorksheet(Worksheet):
         return f'SUM({self.pos_table_name}[[#Data],[Safe]])'
 
     @property
-    def topleft_corner_of_t1(self):
+    def top_left_corner_of_pos_table(self):
         return [2, 1]  # B3 todo add xl to row here too..
 
     @property
-    def topleft_corner_of_t2(self):
+    def top_left_corner_of_strats_table(self):
         return [2, self.portfolio_export_data.shape[1] + 10] # todo add xl to row here too..
 
     @property
     def pos_list_table_range(self):
-        return [self.topleft_corner_of_t1[0], self.topleft_corner_of_t1[1],
-                self.portfolio_export_data.shape[0] + self.topleft_corner_of_t1[0],
+        return [self.top_left_corner_of_pos_table[0], self.top_left_corner_of_pos_table[1],
+                self.portfolio_export_data.shape[0] + self.top_left_corner_of_pos_table[0],
                 self.portfolio_export_data.shape[1] + 2 * len(self.list_of_strats) + 2]
 
     @property
     def strat_list_table_range(self):
-        return [self.topleft_corner_of_t2[0], self.topleft_corner_of_t2[1],
-                self.topleft_corner_of_t2[0] + len(self.list_of_strats),
-                self.topleft_corner_of_t2[1] + 1]
+        return [self.top_left_corner_of_strats_table[0], self.top_left_corner_of_strats_table[1],
+                self.top_left_corner_of_strats_table[0] + len(self.list_of_strats),
+                self.top_left_corner_of_strats_table[1] + 1]
+
+    @property # should this be a property though?
+    def pos_list_table_columns(self):
+        data_columns_headers = ['Financial Instrument', 'Position', 'Last', 'Underlying Price',
+                                'Option Strike']  # todo get these headers programmatically after switching data from a df.values into a df
+        data_columns_formulas = [''] * len(data_columns_headers)
+        calculated_columns_headers = ['Market Value', 'Netliq Contribution', '% of Net Liq']
+        calculated_columns_formulas = [f'={self.polymorphic_market_value_formula}',
+                                       f'={self.polymorphic_netliq_contribution_formula}',
+                                       f'={self.percent_netliq_formula}']
+        strats_list_percent_columns_headers = [strat + ' %' for strat in self.list_of_strats]
+        strats_list_percent_columns_formulas = [''] * len(strats_list_percent_columns_headers)
+        strats_list_columns_formulas = [f'={self.weighted_exposure_formula(strat_header)}' for strat_header in strats_list_percent_columns_headers]
+
+        headers_list = data_columns_headers + calculated_columns_headers + strats_list_percent_columns_headers + self.list_of_strats
+        formulas_list = data_columns_formulas + calculated_columns_formulas + strats_list_percent_columns_formulas + strats_list_columns_formulas
+
+        return [{'header': header, 'formula': formula} for header, formula in zip(headers_list, formulas_list)]
+
+    @property
+    def netliq_cell_loc(self):
+        return '$B$1'
+
+    @property
+    def usdcash_cell_loc(self):
+        return '$B$2'
+
+    @property
+    def warning_cell_loc(self):
+        return [0, self.top_left_corner_of_strats_table[1] + 5]
 
     def add_warnings_and_misc_cells(self):
 
@@ -133,53 +149,32 @@ class CurrentPortfolioWorksheet(Worksheet):
         self.write('A2', 'USD Cash Position:')
 
         # Add warning
-        self.set_column('V:V', width=115)  #data.shape[1] + 15, data.shape[1] + 15 todo incorporate xl_row_col_to_str methods to make this proper...
-        self.write('V1',                     # 0, data.shape[1] + 15, todo incorporate xl_row_col_to_str methods to make this proper...
+        self.set_column(first_col=self.warning_cell_loc[1], last_col=self.warning_cell_loc[1], width=115)  # todo incorporate xl_row_col_to_str methods to make this proper...
+        self.write(self.warning_cell_loc[0], self.warning_cell_loc[1],
                    'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY')
 
         return
 
     def add_positions_list_table(self):
 
-        self.add_table(self.pos_list_table_range[0], self.pos_list_table_range[1], self.pos_list_table_range[2], self.pos_list_table_range[3], {'name': f'{self.pos_table_name}',
-                                                                          'data': self.portfolio_export_data,
-                                                                          'columns': [
-                                                                              {'header': 'Financial Instrument'}, # todo get these headers programmatically after switching data from a df.values into a df
-                                                                              {'header': 'Position'},
-                                                                              {'header': 'Last'},
-                                                                              {'header': 'Underlying Price'},
-                                                                              {'header': 'Option Strike'},
-                                                                              {'header': 'Market Value',
-                                                                               'formula': f'={self.polymorphic_market_value_formula}'},
-                                                                              {'header': 'Netliq Contribution',
-                                                                               'formula': f'={self.polymorphic_netliq_contribution_formula}'},
-                                                                              {'header': '% of Net Liq',
-                                                                               'formula': f'={self.percent_netliq_formula}'},
-                                                                              {'header': 'Redhead %'},
-                                                                              {'header': 'Workhorse %'},
-                                                                              {'header': 'Safe %'},
-                                                                              {'header': 'Redhead',
-                                                                               'formula': f'={self.weighted_exposure_formula_redhead}'},  # todo add some polymorphism
-                                                                              {'header': 'Workhorse',
-                                                                               'formula': f'={self.weighted_exposure_formula_workhorse}'},
-                                                                              {'header': 'Safe',
-                                                                               'formula': f'={self.weighted_exposure_formula_safe}'}
-                                                                              ]})
+        self.add_table(self.pos_list_table_range[0], self.pos_list_table_range[1], self.pos_list_table_range[2],
+                       self.pos_list_table_range[3], {'name': f'{self.pos_table_name}',
+                                                      'data': self.portfolio_export_data,
+                                                      'columns': self.pos_list_table_columns})
 
-        return # todo returns
+        return  # todo returns?
 
-    def add_strategies_table(self): # todo add polymorphism strategy_names):
+    def add_strategies_table(self):
 
         self.add_table(self.strat_list_table_range[0], self.strat_list_table_range[1], self.strat_list_table_range[2],
                        self.strat_list_table_range[3], {'name': self.strat_table_name, 'columns': [{'header': 'Strategy'},
                                                                                         {'header': 'Portfolio Weight'}
                                                                                         ]})
 
-        for i, j in zip(range(len(self.list_of_strats)), self.list_of_strats):
-            self.write(self.topleft_corner_of_t2[0] + i, self.topleft_corner_of_t2[1], j)
-        for i, j in zip([1, 2, 3], [f'={self.redhead_strat_summing_formula}', f'={self.workhorse_strat_summing_formula}',
-                                    f'={self.safe_strat_summing_formula}']): # todo
-            self.write_formula(self.topleft_corner_of_t2[0] + i, self.topleft_corner_of_t2[1] + 1, j)
+        for i, j in zip(range(1, len(self.list_of_strats) + 1), self.list_of_strats):
+            self.write(self.top_left_corner_of_strats_table[0] + i, self.top_left_corner_of_strats_table[1], j)
+        for i, j in zip(range(1, len(self.list_of_strats) + 1), [f'={self.strat_summing_formula(strat)}' for strat in strats_list]):
+            self.write_formula(self.top_left_corner_of_strats_table[0] + i, self.top_left_corner_of_strats_table[1] + 1, j)
 
         return
 
@@ -192,7 +187,7 @@ class CurrentPortfolioWorksheet(Worksheet):
             'values': f'={self.strat_table_name}[Portfolio Weight]',
             'data_labels': {'percentage': True},
         })
-        self.insert_chart(self.topleft_corner_of_t2[0], self.topleft_corner_of_t2[1] + 5, strategy_destribution_chart)
+        self.insert_chart(self.top_left_corner_of_strats_table[0], self.top_left_corner_of_strats_table[1] + 5, strategy_destribution_chart)
 
         return # todo returns
 
@@ -214,7 +209,10 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
     def add_formatting(self):
         self.curr_port_ws.conditional_format(self.curr_port_ws.usdcash_cell_loc, {'type': 'blanks',
                                                                                   'format': self.input_is_required_format})
-        self.curr_port_ws.conditional_format('V1', {'type':'text', 'criteria': 'containing', 'value':'Note',
+        self.curr_port_ws.conditional_format(self.curr_port_ws.warning_cell_loc[0], self.curr_port_ws.warning_cell_loc[1],
+                                             self.curr_port_ws.warning_cell_loc[0],
+                                             self.curr_port_ws.warning_cell_loc[1],
+                                             {'type':'text', 'criteria': 'containing', 'value':'Note',
                                                     'format':wb.add_format({'bold': True, 'bg_color': 'black',
                                                                             'font_color': 'red'})})
         range_for_table = self.curr_port_ws.tables[0]['range']
