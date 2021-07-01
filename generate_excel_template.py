@@ -1,4 +1,5 @@
 import xlsxwriter
+from typing import List
 from xlsxwriter.worksheet import Worksheet
 from read_csv_into_df import read_csv_export
 import pathlib
@@ -7,8 +8,9 @@ import numpy as np
 
 class CurrentPortfolioWorksheet(Worksheet):
 
-    def load_portfolio_export_data(self, portfolio_export_data):
+    def load_portfolio_export_data(self, portfolio_export_data, list_of_strats):
         self.portfolio_export_data = portfolio_export_data
+        self.list_of_strats = list_of_strats
 
     @property
     def netliq_cell_loc(self):
@@ -93,9 +95,11 @@ class CurrentPortfolioWorksheet(Worksheet):
     @property
     def redhead_strat_summing_formula(self):
         return f'SUM({self.pos_table_name}[[#Data],[Redhead]])'
+
     @property
     def workhorse_strat_summing_formula(self):
         return f'SUM({self.pos_table_name}[[#Data],[Workhorse]])'
+
     @property
     def safe_strat_summing_formula(self):
         return f'SUM({self.pos_table_name}[[#Data],[Safe]])'
@@ -111,11 +115,13 @@ class CurrentPortfolioWorksheet(Worksheet):
     @property
     def pos_list_table_range(self):
         return [self.topleft_corner_of_t1[0], self.topleft_corner_of_t1[1],
-                self.portfolio_export_data.shape[0] + self.topleft_corner_of_t1[0], self.portfolio_export_data.shape[1] + 8]
+                self.portfolio_export_data.shape[0] + self.topleft_corner_of_t1[0],
+                self.portfolio_export_data.shape[1] + 2 * len(self.list_of_strats) + 2]
 
     @property
     def strat_list_table_range(self):
-        return [self.topleft_corner_of_t2[0], self.topleft_corner_of_t2[1], self.topleft_corner_of_t2[0] + 3,
+        return [self.topleft_corner_of_t2[0], self.topleft_corner_of_t2[1],
+                self.topleft_corner_of_t2[0] + len(self.list_of_strats),
                 self.topleft_corner_of_t2[1] + 1]
 
     def add_warnings_and_misc_cells(self):
@@ -153,7 +159,7 @@ class CurrentPortfolioWorksheet(Worksheet):
                                                                               {'header': 'Workhorse %'},
                                                                               {'header': 'Safe %'},
                                                                               {'header': 'Redhead',
-                                                                               'formula': f'={self.weighted_exposure_formula_redhead}'}, # todo add some polymorphism
+                                                                               'formula': f'={self.weighted_exposure_formula_redhead}'},  # todo add some polymorphism
                                                                               {'header': 'Workhorse',
                                                                                'formula': f'={self.weighted_exposure_formula_workhorse}'},
                                                                               {'header': 'Safe',
@@ -163,17 +169,16 @@ class CurrentPortfolioWorksheet(Worksheet):
         return # todo returns
 
     def add_strategies_table(self): # todo add polymorphism strategy_names):
-        # data2 = np.zeros([3, 2], '<U1') todo not need this right?
 
-        self.add_table(self.strat_list_table_range[0], self.strat_list_table_range[1], self.strat_list_table_range[2], self.strat_list_table_range[3], {'name': self.strat_table_name,
-                                                                                                                                                # 'data': data2 todo not need this right?
-                                                                            'columns': [{'header': 'Strategy'},
+        self.add_table(self.strat_list_table_range[0], self.strat_list_table_range[1], self.strat_list_table_range[2],
+                       self.strat_list_table_range[3], {'name': self.strat_table_name, 'columns': [{'header': 'Strategy'},
                                                                                         {'header': 'Portfolio Weight'}
                                                                                         ]})
-        for i, j in zip([1, 2, 3], ['Redhead', 'Workhorse', 'Safe']):
+
+        for i, j in zip(range(len(self.list_of_strats)), self.list_of_strats):
             self.write(self.topleft_corner_of_t2[0] + i, self.topleft_corner_of_t2[1], j)
         for i, j in zip([1, 2, 3], [f'={self.redhead_strat_summing_formula}', f'={self.workhorse_strat_summing_formula}',
-                                    f'={self.safe_strat_summing_formula}']):
+                                    f'={self.safe_strat_summing_formula}']): # todo
             self.write_formula(self.topleft_corner_of_t2[0] + i, self.topleft_corner_of_t2[1] + 1, j)
 
         return
@@ -216,9 +221,9 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
         self.curr_port_ws.conditional_format(range_for_table,
                                              {'type': 'blanks', 'format': self.input_is_required_format})
 
-    def create_curr_port_worksh(self, portfolio_export_data):
+    def create_curr_port_worksh(self, portfolio_export_data, list_of_strats: List[str]):
         self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet)
-        self.curr_port_ws.load_portfolio_export_data(portfolio_export_data)
+        self.curr_port_ws.load_portfolio_export_data(portfolio_export_data, list_of_strats)
         self.curr_port_ws.add_warnings_and_misc_cells()
         self.curr_port_ws.add_positions_list_table()
         self.curr_port_ws.add_strategies_table()
@@ -234,7 +239,5 @@ if __name__ == '__main__':
     data_ = read_csv_export(data_filename).values
     workbook_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/Portfolio_mgmt_testing.xlsx'
     wb = PortfolioBalanceWorkbook(workbook_filename, {'nan_inf_to_errors': True})
-    wb.create_curr_port_worksh(data_)
-
-
-
+    strats_list = ['Redhead', 'Workhorse', 'Safe']
+    wb.create_curr_port_worksh(data_, strats_list)
