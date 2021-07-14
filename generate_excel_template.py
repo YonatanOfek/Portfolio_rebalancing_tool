@@ -1,12 +1,12 @@
-import xlsxwriter
-from typing import List
-from xlsxwriter.worksheet import Worksheet
-from read_csv_into_df import read_csv_export
 import pathlib
-import numpy as np
+from typing import List
+
+import xlsxwriter
+
+from read_csv_into_df import read_csv_export
 
 
-class CurrentPortfolioWorksheet(Worksheet):
+class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
 
     def load_portfolio_export_data(self, portfolio_export_data, list_of_strats):
         self.portfolio_export_data = portfolio_export_data
