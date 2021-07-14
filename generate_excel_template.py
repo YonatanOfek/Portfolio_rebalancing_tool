@@ -153,16 +153,12 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         self.write(self.warning_cell_loc[0], self.warning_cell_loc[1],
                    'Note for OPTION POSITIONS - Margin requirement can change at any time, so position sizing values SHOULD BE REVIEWED MANUALLY')
 
-        return
-
     def add_positions_list_table(self):
 
         self.add_table(self.pos_list_table_range[0], self.pos_list_table_range[1], self.pos_list_table_range[2],
                        self.pos_list_table_range[3], {'name': f'{self.pos_table_name}',
                                                       'data': self.portfolio_export_data,
                                                       'columns': self.pos_list_table_columns})
-
-        return  # todo returns?
 
     def add_strategies_table(self):
 
@@ -176,7 +172,6 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         for i, j in zip(range(1, len(self.list_of_strats) + 1), [f'={self.strat_summing_formula(strat)}' for strat in strats_list]):
             self.write_formula(self.top_left_corner_of_strats_table[0] + i, self.top_left_corner_of_strats_table[1] + 1, j)
 
-        return
 
     def add_strat_dist_chart(self):
         # plot a pie chart
@@ -188,8 +183,6 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
             'data_labels': {'percentage': True},
         })
         self.insert_chart(self.top_left_corner_of_strats_table[0], self.top_left_corner_of_strats_table[1] + 5, strategy_destribution_chart)
-
-        return # todo returns
 
 
 class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
@@ -228,7 +221,6 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
         self.curr_port_ws.add_strat_dist_chart()
         self.add_formatting()
         self.close()
-        return # todo returns
 
 
 if __name__ == '__main__':
