@@ -53,9 +53,25 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
     def call_market_value_formula(self):
         return 0  # todo v3
 
+
+    @property
+    def polymorphic_long_short_call_option_market_value_formula(self):
+        return f'If([[#This Row],[Position]] > 0,{self.call_market_value_formula},{self.short_call_market_value_formula})'
+
+
+    @property
+    def polymorphic_long_short_put_option_market_value_formula(self):
+        return f'If([[#This Row],[Position]] > 0,{self.put_market_value_formula},{self.short_put_market_value_formula})'
+
+
+    @property
+    def polymorphic_call_put_option_market_value_formula(self):
+        return f'If([[#This Row],[Option Strike]] > 0,{self.polymorphic_long_short_call_option_market_value_formula},' \
+               f'{self.polymorphic_long_short_put_option_market_value_formula})'
+
     @property
     def polymorphic_market_value_formula(self):
-        return f'If([[#This Row],[Option Strike]] > 0,{self.short_put_market_value_formula},{self.stock_market_value_formula})'
+        return f'If([[#This Row],[Option Strike]] > 0,{self.polymorphic_call_put_option_market_value_formula},{self.stock_market_value_formula})'
 
     @property
     def short_option_netliq_contribution_formula(self):
