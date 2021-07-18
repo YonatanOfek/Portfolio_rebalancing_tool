@@ -103,7 +103,7 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
     def pos_list_table_range(self):
         return [self.top_left_corner_of_pos_table[0], self.top_left_corner_of_pos_table[1],
                 self.portfolio_export_data.shape[0] + self.top_left_corner_of_pos_table[0],
-                self.portfolio_export_data.shape[1] + len(self.list_of_strats)]
+                self.portfolio_export_data.shape[1] + 2 * len(self.list_of_strats)]
 
     @property
     def strat_list_table_range(self):
@@ -111,23 +111,34 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
                 self.top_left_corner_of_strats_table[0] + len(self.list_of_strats),
                 self.top_left_corner_of_strats_table[1] + 1]
 
-    @property # should this be a property though?
-    def pos_list_table_columns(self):
-        data_columns_headers = ['Financial Instrument', 'Position', 'Last', 'Underlying Price',
-                                'Option Strike']  # todo get these headers programmatically after switching data from a df.values into a df
-        data_columns_formulas = [''] * len(data_columns_headers)
+    @property
+    def data_columns(self):
+        return ['Financial Instrument', 'Position', 'Last', 'Underlying Price', 'Option Strike']  # todo get these headers programmatically after switching data from a df.values into a df
+
+    @property
+    def pos_table_headers_list(self):
+        data_columns_headers = self.data_columns
         calculated_columns_headers = ['MarketValue', 'Netliq Contribution', '% of NetLiq']
+        strats_list_percent_columns_headers = [strat + ' %' for strat in self.list_of_strats]
+        return data_columns_headers + calculated_columns_headers + strats_list_percent_columns_headers + self.list_of_strats
+
+    @property
+    def pos_table_formulas_list(self):
+        data_columns_formulas = [''] * len(self.data_columns)
+
         calculated_columns_formulas = [f'={self.polymorphic_market_value_formula}',
                                        f'={self.polymorphic_netliq_contribution_formula}',
                                        f'={self.percent_netliq_formula}']
-        strats_list_percent_columns_headers = [strat + ' %' for strat in self.list_of_strats]
-        strats_list_percent_columns_formulas = [''] * len(strats_list_percent_columns_headers)
-        strats_list_columns_formulas = [f'={self.weighted_exposure_formula(strat_header)}' for strat_header in strats_list_percent_columns_headers]
 
-        headers_list = data_columns_headers + calculated_columns_headers + strats_list_percent_columns_headers + self.list_of_strats
-        formulas_list = data_columns_formulas + calculated_columns_formulas + strats_list_percent_columns_formulas + strats_list_columns_formulas
+        strats_list_percent_columns_formulas = [''] * len(self.list_of_strats)
+        strats_list_columns_formulas = [f'={self.weighted_exposure_formula(strat_header)}' for strat_header in
+                                        [strat + ' %' for strat in self.list_of_strats]]
+        return data_columns_formulas + calculated_columns_formulas + strats_list_percent_columns_formulas + strats_list_columns_formulas
 
-        return [{'header': header, 'formula': formula} for header, formula in zip(headers_list, formulas_list)]
+
+    @property # should this be a property though?
+    def pos_list_table_columns(self):
+        return [{'header': header, 'formula': formula} for header, formula in zip(self.pos_table_headers_list, self.pos_table_formulas_list)]
 
     @property
     def netliq_cell_loc(self):
@@ -190,10 +201,11 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         json_df = pd.read_json(json_filename)
 
         for i in range(json_df.shape[0]):
-            for j in range(self.tables[0].shape[0]):
-                if json_df['Financial Instrument'][i] == self.portfolio_export_data[0][j]:
+            for j in range(self.pos_list_table_range[2] - self.pos_list_table_range[0]):
+                if json_df['Financial Instrument'][i] == self.portfolio_export_data[j][0]:
                     for strat in json_df.columns[1:]:
-                        self.tables[0][f'{strat}'][j] = json_df[f'{strat}'][i]  # todo this is improper pandas
+                        self.write_number(j + self.top_left_corner_of_pos_table[0] + 1, self.pos_table_headers_list.index(strat)
+                                          + self.top_left_corner_of_pos_table[1], json_df[f'{strat}'][i])
                     break
 
 class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
@@ -241,7 +253,7 @@ if __name__ == '__main__':
         "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_v2.csv")
     strats_list = ['Redhead', 'Workhorse', 'Safe']
     json_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/jsons/save_weights_testing.json'
-    data_ = read_csv_export(data_filename, json_filename).values
+    data_ = read_csv_export(data_filename).values
     workbook_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/Portfolio_mgmt_testing.xlsx'
     wb = PortfolioBalanceWorkbook(workbook_filename, {'nan_inf_to_errors': True})
-    wb.create_curr_port_worksh(data_, strats_list)
+    wb.create_curr_port_worksh(data_, strats_list, json_filename)
