@@ -62,7 +62,7 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
 
     @property
     def stock_netliq_contribution_formula(self):
-        return '[[#This Row],[Market Value]]'
+        return '[[#This Row],[MarketValue]]'
 
     @property
     def polymorphic_netliq_contribution_formula(self):
@@ -70,10 +70,10 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
 
     @property
     def percent_netliq_formula(self):
-        return f'([[#This Row],[Market Value]])/{self.netliq_cell_loc}'
+        return f'([[#This Row],[MarketValue]])/{self.netliq_cell_loc}'
 
     def weighted_exposure_formula(self, column_header):
-        return f'([[#This Row],[Market Value]])*([[#This Row],[{column_header}]])'
+        return f'([[#This Row],[MarketValue]])*([[#This Row],[{column_header}]])'
 
     def strat_summing_formula(self, strat_name):
         return f'SUM({self.pos_table_name}[[#Data],[{strat_name}]])'
@@ -102,7 +102,7 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
     def pos_list_table_range(self):
         return [self.top_left_corner_of_pos_table[0], self.top_left_corner_of_pos_table[1],
                 self.portfolio_export_data.shape[0] + self.top_left_corner_of_pos_table[0],
-                self.portfolio_export_data.shape[1] + 2 * len(self.list_of_strats) + 2]
+                self.portfolio_export_data.shape[1] + len(self.list_of_strats)]
 
     @property
     def strat_list_table_range(self):
