@@ -46,10 +46,17 @@ def filter_data(df_):
 
 def rearrange_columns(df_, json_filename=None): # todo this func does two things...
     option_strike = pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name='Option Strike')
+    market_value = pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name='MarketValue')
     netliq_cont = pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name='Netliq Contribution')
-    df_ = pd.concat([df_, option_strike, netliq_cont], axis=1)
-    target_columns = ['Financial Instrument', 'Position', 'Last', 'Underlying Price', 'Option Strike',
-                      'Netliq Contribution']
+    percent_of_netliq = pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name='% of NetLiq')
+    df_ = pd.concat([df_, option_strike, market_value, netliq_cont, percent_of_netliq], axis=1)
+    target_columns = ['Financial Instrument', 'Position', 'Last', 'Underlying Price', 'Option Strike', 'MarketValue',
+                      'Netliq Contribution', '% of NetLiq']
+    if json_filename is not None:
+        names_ = pd.read_json(json_filename).columns[1:]
+        strats = [pd.Series(np.zeros((df_.shape[0]), dtype='1>U'), name=name_) for name_ in names_]
+        df_ = pd.concat([df_] + strats, axis=1)
+        return pd.concat([df_[key] for key in target_columns + [name_ for name_ in names_]], axis=1)
 
     return pd.concat([df_[key] for key in target_columns], axis=1)
 
