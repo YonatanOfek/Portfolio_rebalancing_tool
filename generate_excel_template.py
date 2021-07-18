@@ -1,7 +1,8 @@
 import pathlib
-from typing import List
+from typing import List, Union
 
 import xlsxwriter
+import pandas as pd
 
 from read_csv_into_df import read_csv_export
 
@@ -184,6 +185,16 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         })
         self.insert_chart(self.top_left_corner_of_strats_table[0], self.top_left_corner_of_strats_table[1] + 5, strategy_destribution_chart)
 
+    def add_json_inputs(self, json_filename):  # todo - an elegant way to add to the df if there's data to add
+
+        json_df = pd.read_json(json_filename)
+
+        for i in range(json_df.shape[0]):
+            for j in range(self.tables[0].shape[0]):
+                if json_df['Financial Instrument'][i] == self.portfolio_export_data[0][j]:
+                    for strat in json_df.columns[1:]:
+                        self.tables[0][f'{strat}'][j] = json_df[f'{strat}'][i]  # todo this is improper pandas
+                    break
 
 class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
     """
@@ -212,11 +223,13 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
         self.curr_port_ws.conditional_format(range_for_table,
                                              {'type': 'blanks', 'format': self.input_is_required_format})
 
-    def create_curr_port_worksh(self, portfolio_export_data, list_of_strats: List[str]):
+    def create_curr_port_worksh(self, portfolio_export_data, list_of_strats: List[str], json_filename: Union[None, str] = None):
         self.curr_port_ws = self.add_worksheet('Current Portfolio', worksheet_class=CurrentPortfolioWorksheet)
         self.curr_port_ws.load_portfolio_export_data(portfolio_export_data, list_of_strats)
         self.curr_port_ws.add_warnings_and_misc_cells()
         self.curr_port_ws.add_positions_list_table()
+        if json_filename is not None:
+            self.curr_port_ws.add_json_inputs(json_filename)
         self.curr_port_ws.add_strategies_table()
         self.curr_port_ws.add_strat_dist_chart()
         self.add_formatting()

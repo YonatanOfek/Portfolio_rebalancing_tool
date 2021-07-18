@@ -14,7 +14,7 @@ def add_json_inputs(df_, json_filename):  # todo - an elegant way to add to the 
         for j in range(df_.shape[0]):
             if json_df['Financial Instrument'][i] == df_['Financial Instrument'][j]:
                 for strat in json_df.columns[1:]:
-                    df_[f'{strat}'][j] = json_df[f'{strat}'][i] # todo this is improper pandas
+                    df_[f'{strat}'][j] = json_df[f'{strat}'][i]  # todo this is improper pandas
                 break
 
     return df_
