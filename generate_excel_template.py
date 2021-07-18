@@ -115,7 +115,7 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         data_columns_headers = ['Financial Instrument', 'Position', 'Last', 'Underlying Price',
                                 'Option Strike']  # todo get these headers programmatically after switching data from a df.values into a df
         data_columns_formulas = [''] * len(data_columns_headers)
-        calculated_columns_headers = ['Market Value', 'Netliq Contribution', '% of Net Liq']
+        calculated_columns_headers = ['MarketValue', 'Netliq Contribution', '% of NetLiq']
         calculated_columns_formulas = [f'={self.polymorphic_market_value_formula}',
                                        f'={self.polymorphic_netliq_contribution_formula}',
                                        f'={self.percent_netliq_formula}']
@@ -226,8 +226,9 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
 if __name__ == '__main__':
     data_filename = pathlib.Path(
         "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_v2.csv")
-    data_ = read_csv_export(data_filename).values
+    strats_list = ['Redhead', 'Workhorse', 'Safe']
+    json_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/jsons/save_weights_testing.json'
+    data_ = read_csv_export(data_filename, json_filename).values
     workbook_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/Portfolio_mgmt_testing.xlsx'
     wb = PortfolioBalanceWorkbook(workbook_filename, {'nan_inf_to_errors': True})
-    strats_list = ['Redhead', 'Workhorse', 'Safe']
     wb.create_curr_port_worksh(data_, strats_list)

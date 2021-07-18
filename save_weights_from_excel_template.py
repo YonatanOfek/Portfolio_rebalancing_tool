@@ -21,7 +21,7 @@ def get_data_from_excel_table_by_colname(table, workbook, col_name):
 def generate_weights_json(excel_file_name, strat_names, output_file_name):
     wb = load_workbook(filename=excel_file_name)
     pos_list = wb.worksheets[0].tables['Position_list']
-    col_names = [strat + ' %' for strat in strat_names]
+    col_names = ['Financial Instrument'] + [strat + ' %' for strat in strat_names]
 
     df_ = pd.concat([pd.Series(data=get_data_from_excel_table_by_colname(pos_list, wb, col_name), name=col_name)
                      for col_name in col_names], axis=1)
