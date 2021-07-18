@@ -96,14 +96,14 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         return [2, 1]  # B3 todo add xl to row here too..
 
     @property
-    def top_left_corner_of_strats_table(self):
-        return [2, self.portfolio_export_data.shape[1] + 10] # todo add xl to row here too..
-
-    @property
     def pos_list_table_range(self):
         return [self.top_left_corner_of_pos_table[0], self.top_left_corner_of_pos_table[1],
                 self.portfolio_export_data.shape[0] + self.top_left_corner_of_pos_table[0],
                 self.portfolio_export_data.shape[1] + 2 * len(self.list_of_strats)]
+
+    @property
+    def top_left_corner_of_strats_table(self):
+        return [2, self.pos_list_table_range[3] + 2]  # todo add xl to row here too..
 
     @property
     def strat_list_table_range(self):
@@ -250,10 +250,11 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
 
 if __name__ == '__main__':
     data_filename = pathlib.Path(
-        "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/portfolio_export_for_testing_v2.csv")
-    strats_list = ['Redhead', 'Workhorse', 'Safe']
+        "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/E18072021_clean.csv")
+    strats_list = ['Andrew', 'Sven', 'Momentum bets', 'Researched Growth Companies', ]
+    strats_list2 = ['Crypto', 'MJ', 'Materials and Defensives', 'Researched Growth Companies', 'Momentum Hype']
     json_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/jsons/save_weights_testing.json'
     data_ = read_csv_export(data_filename).values
-    workbook_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/Portfolio_mgmt_testing.xlsx'
+    workbook_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/E18072021_clean.xlsx'
     wb = PortfolioBalanceWorkbook(workbook_filename, {'nan_inf_to_errors': True})
-    wb.create_curr_port_worksh(data_, strats_list, json_filename)
+    wb.create_curr_port_worksh(data_, strats_list2)
