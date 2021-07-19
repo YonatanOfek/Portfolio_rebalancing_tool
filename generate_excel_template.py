@@ -26,32 +26,40 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         return f"{self.usdcash_cell_loc} + SUM({self.pos_table_name}[[#Data],[Netliq Contribution]])"
 
     @property
-    def stock_market_value_formula(self):
+    def market_value_formula_stock(self):
         return f'[[#This Row],[Position]]*[[#This Row],[Last]]'
 
     @property
-    def otm_formula(self):
+    def otm_formula_put(self):
         return f'MAX(0,[[#This Row],[Underlying Price]]-[[#This Row],[Option Strike]])'
 
     @property
-    def maxing_formula(self):
-        return f'Max(0.2* [[#This Row],[Underlying Price]] - {self.otm_formula},[[#This Row],[Option Strike]] * 0.1)'
+    def maxing_formula_short_put(self):
+        return f'Max(0.2* [[#This Row],[Underlying Price]] - {self.otm_formula_put},[[#This Row],[Option Strike]] * 0.1)'
 
     @property
     def short_put_market_value_formula(self):
-        return f'[[#This Row],[Position]]*(-100)*([[#This Row],[Last]]+{self.maxing_formula})'
+        return f'[[#This Row],[Position]]*(-100)*([[#This Row],[Last]]+{self.maxing_formula_short_put})'
 
     @property
     def put_market_value_formula(self):
-        return 0  # todo v3
+        return f'0'
+
+    @property
+    def otm_formula_call(self):
+        return f'MAX(0,[[#This Row],[Option Strike]]- [[#This Row],[Underlying Price]])'
+
+    @property
+    def maxing_formula_short_call(self):
+        return f'Max(0.2* [[#This Row],[Underlying Price]] - {self.otm_formula_call},[[#This Row],[Underlying Price]] * 0.1)'
 
     @property
     def short_call_market_value_formula(self):
-        return 0  # todo v3
+        return f'[[#This Row],[Position]]*(-100)*([[#This Row],[Last]] + {self.maxing_formula_short_call})' # This uses the formula for naked calls because it is more stringent. Also - it is used by IBKR for PMCCs
 
     @property
-    def call_market_value_formula(self):
-        return 0  # todo v3
+    def call_market_value_formula(self): # todo add support for warrants
+        return f'0'
 
     @property
     def polymorphic_long_short_call_option_market_value_formula(self):
@@ -68,11 +76,19 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
 
     @property
     def polymorphic_market_value_formula(self):
-        return f'If([[#This Row],[Option Strike]] > 0,{self.polymorphic_call_put_option_market_value_formula},{self.stock_market_value_formula})'
+        return f'If([[#This Row],[Option Strike]] > 0,{self.polymorphic_call_put_option_market_value_formula},{self.market_value_formula_stock})'
 
     @property
     def short_option_netliq_contribution_formula(self):
         return '(-100)*[[#This Row],[Last]]*[[#This Row],[Position]]'
+
+    @property
+    def long_option_netliq_contribution_formula(self):
+        return '(100)*[[#This Row],[Last]]*[[#This Row],[Position]]'
+
+    @property
+    def polymorphic_long_short_option_netliq_contribution_formula(self):
+        return f'If([[#This Row],[Position]] > 0,{self.long_option_netliq_contribution_formula},{self.short_option_netliq_contribution_formula})'
 
     @property
     def stock_netliq_contribution_formula(self):
@@ -80,7 +96,8 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
 
     @property
     def polymorphic_netliq_contribution_formula(self):
-        return f'If([[#This Row],[Option Strike]] > 0,{self.short_option_netliq_contribution_formula},{self.stock_netliq_contribution_formula})'
+        return f'If([[#This Row],[Option Strike]] > 0,{self.polymorphic_long_short_option_netliq_contribution_formula},' \
+               f'{self.stock_netliq_contribution_formula})'
 
     @property
     def percent_netliq_formula(self):
@@ -194,7 +211,7 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
 
         for i, j in zip(range(1, len(self.list_of_strats) + 1), self.list_of_strats):
             self.write(self.top_left_corner_of_strats_table[0] + i, self.top_left_corner_of_strats_table[1], j)
-        for i, j in zip(range(1, len(self.list_of_strats) + 1), [f'={self.strat_summing_formula(strat)}' for strat in strats_list]):
+        for i, j in zip(range(1, len(self.list_of_strats) + 1), [f'={self.strat_summing_formula(strat)}' for strat in self.list_of_strats]):
             self.write_formula(self.top_left_corner_of_strats_table[0] + i, self.top_left_corner_of_strats_table[1] + 1, j)
 
 
