@@ -58,12 +58,12 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         return f'[[#This Row],[Position]]*(-100)*([[#This Row],[Last]] + {self.maxing_formula_short_call})' # This uses the formula for naked calls because it is more stringent. Also - it is used by IBKR for PMCCs
 
     @property
-    def call_market_value_formula(self): # todo add support for warrants
-        return f'0'
+    def call_and_warrant_market_value_formula(self):
+        return f'{self.long_option_netliq_contribution_formula}'
 
     @property
     def polymorphic_long_short_call_option_market_value_formula(self):
-        return f'If([[#This Row],[Position]] > 0,{self.call_market_value_formula},{self.short_call_market_value_formula})'
+        return f'If([[#This Row],[Position]] > 0,{self.call_and_warrant_market_value_formula},{self.short_call_market_value_formula})'
 
     @property
     def polymorphic_long_short_put_option_market_value_formula(self):
@@ -84,7 +84,7 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
 
     @property
     def long_option_netliq_contribution_formula(self):
-        return '(100)*[[#This Row],[Last]]*[[#This Row],[Position]]'
+        return 'If([[#This Row],[Option Type]]="WAR",[[#This Row],[Last]]*[[#This Row],[Position]],(100)*[[#This Row],[Last]]*[[#This Row],[Position]])'
 
     @property
     def polymorphic_long_short_option_netliq_contribution_formula(self):
@@ -138,7 +138,7 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
     @property
     def strat_list_table_range(self):
         return [self.top_left_corner_of_strats_table[0], self.top_left_corner_of_strats_table[1],
-                self.top_left_corner_of_strats_table[0] + len(self.list_of_strats),
+                self.top_left_corner_of_strats_table[0] + len(self.list_of_strats) + 1,
                 self.top_left_corner_of_strats_table[1] + 1]
 
     @property
@@ -164,7 +164,6 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
         strats_list_columns_formulas = [f'={self.weighted_exposure_formula(strat_header)}' for strat_header in
                                         [strat + ' %' for strat in self.list_of_strats]]
         return data_columns_formulas + calculated_columns_formulas + strats_list_percent_columns_formulas + strats_list_columns_formulas
-
 
     @property # should this be a property though?
     def pos_list_table_columns(self):
@@ -209,11 +208,10 @@ class CurrentPortfolioWorksheet(xlsxwriter.worksheet.Worksheet):
                                                                                         {'header': 'Portfolio Weight'}
                                                                                         ]})
 
-        for i, j in zip(range(1, len(self.list_of_strats) + 1), self.list_of_strats):
+        for i, j in zip(range(1, len(self.list_of_strats) + 2), self.list_of_strats + ['Cash']):
             self.write(self.top_left_corner_of_strats_table[0] + i, self.top_left_corner_of_strats_table[1], j)
-        for i, j in zip(range(1, len(self.list_of_strats) + 1), [f'={self.strat_summing_formula(strat)}' for strat in self.list_of_strats]):
+        for i, j in zip(range(1, len(self.list_of_strats) + 2), [f'={self.strat_summing_formula(strat)}' for strat in self.list_of_strats] + [f'={self.usdcash_cell_loc}']):
             self.write_formula(self.top_left_corner_of_strats_table[0] + i, self.top_left_corner_of_strats_table[1] + 1, j)
-
 
     def add_strat_dist_chart(self):
         # plot a pie chart
@@ -280,11 +278,12 @@ class PortfolioBalanceWorkbook(xlsxwriter.Workbook):
 
 if __name__ == '__main__':
     data_filename = pathlib.Path(
-        "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/E18072021_clean.csv")
-    strats_list = ['Andrew', 'Sven', 'Momentum bets', 'Researched Growth Companies', ]
+        "C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/input_files_for_scripts/E19072021_clean.csv")
+    strats_list = ['Andrew', 'Sven', 'UD', 'Yonatan', 'Oz']
+    strats_list1 = ['Redhead', 'Workhorse', 'Safe']
     strats_list2 = ['Crypto', 'MJ', 'Materials and Defensives', 'Researched Growth Companies', 'Momentum Hype']
-    json_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/jsons/save_weights_testing.json'
+    json_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/jsons/save_weights_E18072021.json'
     data_ = read_csv_export(data_filename).values
-    workbook_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/E18072021_clean.xlsx'
+    workbook_filename = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/E19072021_clean_filled.xlsx'
     wb = PortfolioBalanceWorkbook(workbook_filename, {'nan_inf_to_errors': True})
-    wb.create_curr_port_worksh(data_, strats_list2)
+    wb.create_curr_port_worksh(data_, strats_list2, json_filename)

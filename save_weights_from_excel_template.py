@@ -29,7 +29,8 @@ def generate_weights_json(excel_file_name, strat_names, output_file_name):
 
 
 if __name__ == '__main__':
-    input_file_name = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/Portfolio_mgmt_testing.xlsx'
-    strats_list = ['Redhead', 'Workhorse', 'Safe'] # todo - pass this programmatically
-    output_file_name = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/jsons/save_weights_testing.json'
-    generate_weights_json(input_file_name, strats_list, output_file_name)
+    input_file_name = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/outputs/E18072021_clean_filled.xlsx'
+    strats_list1 = ['Redhead', 'Workhorse', 'Safe'] # todo - pass this programmatically
+    strats_list2 = ['Crypto', 'MJ', 'Materials and Defensives', 'Researched Growth Companies', 'Momentum Hype']
+    output_file_name = 'C:/Users/Anton/PycharmProjects/Portfolio_rebalancing_tool/jsons/save_weights_E18072021.json'
+    generate_weights_json(input_file_name, strats_list2, output_file_name)
